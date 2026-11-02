@@ -178,46 +178,46 @@ The tricky part. All in Compose, no View-based `DragEvent`.
 Each milestone ends with something installable and testable on a real device.
 
 ### M0 — Project skeleton
-- [ ] Gradle project (`app.latch`), Kotlin, Compose BOM, minSdk 26, target/compileSdk latest.
-- [ ] Dependencies: compose (ui, foundation, material3), activity-compose, lifecycle-viewmodel-compose, datastore-preferences, kotlinx-serialization-json, kotlinx-coroutines.
-- [ ] Manifest as above, transparent wallpaper theme, edge-to-edge.
-- [ ] `MainActivity` showing "Latch" over the wallpaper.
+- [x] Gradle project (`app.latch`), Kotlin, Compose BOM, minSdk 26, target/compileSdk latest.
+- [x] Dependencies: compose (ui, foundation, material3), activity-compose, lifecycle-viewmodel-compose, datastore-preferences, kotlinx-serialization-json, kotlinx-coroutines.
+- [x] Manifest as above, transparent wallpaper theme, edge-to-edge.
+- [x] `MainActivity` showing "Latch" over the wallpaper.
 - **Done when**: Latch can be picked as default home app and the wallpaper shows through.
 
 ### M1 — App drawer
-- [ ] `AppRepository` with callback-driven `StateFlow`.
-- [ ] `AlphaSections` (pure, unit-tested): Collator sort, `#` bucket, accent folding for headers (`É` → `E`).
-- [ ] `AppDrawer`: `LazyColumn` + `stickyHeader`, rows of tiles (icon + label, max 2 lines, ellipsized).
-- [ ] `IconLoader` with LRU cache; placeholder while loading.
-- [ ] Swipe-up open / swipe-down close / Back closes.
-- [ ] Tap → launch; long-press → "App info".
+- [x] `AppRepository` with callback-driven `StateFlow`.
+- [x] `AlphaSections` (pure, unit-tested): Collator sort, `#` bucket, accent folding for headers (`É` → `E`).
+- [x] `AppDrawer`: `LazyColumn` + `stickyHeader`, rows of tiles (icon + label, max 2 lines, ellipsized).
+- [x] `IconLoader` with LRU cache; placeholder while loading.
+- [x] Swipe-up open / swipe-down close / Back closes.
+- [x] Tap → launch; long-press → "App info".
 - **Done when**: installing/uninstalling an app updates the drawer live; scrolling is smooth (no jank with ~200 apps).
 
 ### M2 — Categories on Home
-- [ ] `Category`, `CategoryOps` (pure, unit-tested), `CategoryStore` (DataStore + JSON).
-- [ ] `HomeScreen`: centered category names, bold large type; accordion expand/collapse with `AnimatedVisibility`.
-- [ ] Expanded category shows its apps as a horizontal row (scrollable if overflowing) like the reference.
-- [ ] Add / rename / delete category (dialog with `TextField`).
-- [ ] Prune uninstalled apps when combining state.
-- [ ] Home button while on Home → collapse all, close drawer.
+- [x] `Category`, `CategoryOps` (pure, unit-tested), `CategoryStore` (DataStore + JSON).
+- [x] `HomeScreen`: centered category names, bold large type; accordion expand/collapse with `AnimatedVisibility`.
+- [x] Expanded category shows its apps as a horizontal row (scrollable if overflowing) like the reference.
+- [x] Add / rename / delete category (dialog with `TextField`).
+- [x] Prune uninstalled apps when combining state.
+- [x] Home button while on Home → collapse all, close drawer.
 - **Done when**: categories survive force-stop and reboot.
 
 ### M3 — Drag and drop
-- [ ] `DragState` + overlay drag shadow.
-- [ ] Gesture handling in `AppTile` (long-press → menu, move → drag).
-- [ ] Drawer auto-closes when a drag starts; category drop targets highlight on hover.
-- [ ] Drop → add to category (no duplicates); drag from one category to another → move.
-- [ ] Long-press in a category → "Remove from category" / "App info".
+- [x] `DragState` + overlay drag shadow.
+- [x] Gesture handling in `AppTile` (long-press → menu, move → drag).
+- [x] Drawer auto-closes when a drag starts; category drop targets highlight on hover.
+- [x] Drop → add to category (no duplicates); drag from one category to another → move.
+- [x] Long-press in a category → "Remove from category" / "App info".
 - **Done when**: an app can be dragged from the drawer into any category and removed again, with haptic feedback.
 
 ### M4 — Polish
-- [ ] Fast-scroller with letter bubble.
-- [ ] Animations: drawer fade/slide, category expand spring, drop "bump".
-- [ ] Work profile apps (badged icons) in drawer and categories.
-- [ ] Reorder categories (long-press name → drag vertically).
-- [ ] Dark text-shadow / scrim so labels stay readable on bright wallpapers.
-- [ ] Baseline profile + R8 for fast startup.
-- [ ] Rotation/config-change and process-death safety (`rememberSaveable` for expanded/drawer state).
+- [x] Fast-scroller with letter bubble.
+- [x] Animations: drawer fade/slide, category expand spring, drop "bump".
+- [x] Work profile apps (badged icons) in drawer and categories.
+- [x] Reorder categories (long-press name → drag vertically).
+- [x] Dark text-shadow / scrim so labels stay readable on bright wallpapers.
+- [x] Baseline profile + R8 for fast startup. (Hand-written `baseline-prof.txt`; a generated Macrobenchmark profile is a follow-up.)
+- [x] Rotation/config-change and process-death safety (`rememberSaveable` for expanded/drawer state).
 
 ### Later (post v1)
 Search bar ("Tap to search" pill at the bottom), usage time per app/category via `UsageStatsManager` (needs `PACKAGE_USAGE_STATS` granted manually), hide apps, settings, export/import categories.
