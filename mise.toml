@@ -1,0 +1,4 @@
+[tools]
+android-sdk = "latest"
+java = "17"
+yq = "latest"
