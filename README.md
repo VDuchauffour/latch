@@ -11,6 +11,12 @@ Requirements: JDK 17, Android SDK with platform 35.
 adb shell cmd package set-home-activity app.latch/.MainActivity   # make Latch the home app
 ```
 
+With multiple devices/emulators connected, target one via `adb`'s serial:
+
+```sh
+export ANDROID_SERIAL=emulator-5554   # gradle installDebug and connected tests use only this device
+```
+
 Release build (R8 + resource shrinking; signed with the debug key for convenience):
 
 ```sh
