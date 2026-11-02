@@ -6,6 +6,12 @@ A minimal, text-first Android launcher: a centered list of user-defined **catego
 
 Requirements: JDK 17, Android SDK with platform 35.
 
+One-time setup (installs JDK 17, the Android SDK, and yq via [mise](https://mise.jdx.dev/), then accepts SDK licenses):
+
+```sh
+mise install               # or: just setup (also accepts SDK licenses)
+```
+
 ```sh
 ./gradlew installDebug
 adb shell cmd package set-home-activity app.latch/.MainActivity   # make Latch the home app
