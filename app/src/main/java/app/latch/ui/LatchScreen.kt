@@ -88,7 +88,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val sheet = remember {
         AnchoredDraggableState(
             initialValue = if (state.drawerOpen) DrawerValue.Open else DrawerValue.Closed,
-            positionalThreshold = { distance -> distance * 0.35f },
+            positionalThreshold = { distance -> distance * 0.2f },
             velocityThreshold = { with(density) { 500.dp.toPx() } },
             snapAnimationSpec = spring(dampingRatio = 0.9f, stiffness = 500f),
             decayAnimationSpec = exponentialDecay(),
@@ -296,7 +296,6 @@ private fun NameDialog(
 ) {
     var text by rememberSaveable { mutableStateOf(initial) }
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focus.requestFocus() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -307,6 +306,8 @@ private fun NameDialog(
                 singleLine = true,
                 modifier = Modifier.focusRequester(focus).testTag("nameField"),
             )
+            // Inside the dialog's own composition so the field is attached; never crash over focus.
+            LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(text) }, enabled = text.isNotBlank()) { Text(confirm) }

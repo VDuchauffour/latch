@@ -12,6 +12,7 @@ import app.latch.domain.CategoryOps
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 private val Context.latchDataStore: DataStore<Preferences> by preferencesDataStore(name = "latch")
 
@@ -20,9 +21,8 @@ class CategoryStore(private val dataStore: DataStore<Preferences>) {
 
     constructor(context: Context) : this(context.applicationContext.latchDataStore)
 
-    /** Emits the stored categories; an absent key emits an empty list until [seedIfEmpty] runs. */
-    val categories: Flow<List<Category>> = dataStore.data.map { prefs ->
-        val text = prefs[KEY] ?: return@map emptyList()
+    /** Emits the stored categories; nothing is emitted until the document exists (see [seedIfEmpty]). */
+    val categories: Flow<List<Category>> = dataStore.data.mapNotNull { it[KEY] }.map { text ->
         CategoryCodec.decode(text) ?: run {
             Log.w(TAG, "Unreadable categories document, showing nothing")
             emptyList()

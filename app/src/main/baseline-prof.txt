@@ -1,0 +1,5 @@
+# Hand-written startup profile for Latch (compiled AOT at install by ProfileInstaller).
+# Compose and AndroidX ship their own profiles; this covers our own code on the startup path.
+# Regenerate with a Macrobenchmark BaselineProfileRule on a device for a precise profile.
+HSPLapp/latch/**->**(**)**
+Lapp/latch/**;

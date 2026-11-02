@@ -2,7 +2,9 @@ package app.latch
 
 import android.content.Intent
 import android.os.Bundle
+import android.graphics.Color
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -17,7 +19,9 @@ class MainActivity : ComponentActivity() {
     private val vm: LatchViewModel by viewModels { LatchViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        // White text everywhere, so keep light system-bar icons whatever the system theme.
+        val bars = SystemBarStyle.dark(Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
         super.onCreate(savedInstanceState)
         val app = application as LatchApp
         setContent {
