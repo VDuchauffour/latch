@@ -39,12 +39,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -182,27 +184,33 @@ private fun FastScroller(
         }
     }
 
+    val currentJump by rememberUpdatedState<(Float) -> Unit>(::jumpTo)
+    // Stable block: a new lambda per recomposition would reset (and cancel) the gesture.
+    val scrollerInput: suspend PointerInputScope.() -> Unit = remember {
+        {
+            awaitEachGesture {
+                val down = awaitFirstDown()
+                down.consume()
+                dragging = true
+                dragSection = -1
+                currentJump(down.position.y)
+                while (true) {
+                    val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+                    change.consume()
+                    currentJump(change.position.y)
+                }
+                dragging = false
+            }
+        }
+    }
+
     Box(
         modifier
             .width(28.dp)
             .testTag("fastScroller")
             .onSizeChanged { trackHeight = it.height.coerceAtLeast(1) }
-            .pointerInput(sections, layout) {
-                awaitEachGesture {
-                    val down = awaitFirstDown()
-                    down.consume()
-                    dragging = true
-                    dragSection = -1
-                    jumpTo(down.position.y)
-                    while (true) {
-                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
-                        if (!change.pressed) break
-                        change.consume()
-                        jumpTo(change.position.y)
-                    }
-                    dragging = false
-                }
-            },
+            .pointerInput(sections, layout, scrollerInput),
     ) {
         // Thumb
         Box(

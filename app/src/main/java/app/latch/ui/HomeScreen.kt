@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -129,6 +130,11 @@ fun HomeScreen(
         }
     }
 
+    // Stable instance: read inside graphicsLayer only, so dragging doesn't recompose the list.
+    val reorderOffset: (String) -> Float = remember(dragState) {
+        { id -> dragState.targetBounds(id)?.let { reorderPointerY - it.center.y } ?: 0f }
+    }
+
     BoxWithConstraints(modifier.fillMaxSize()) {
         val viewport = maxHeight
         val insets = WindowInsets.systemBars.asPaddingValues()
@@ -148,6 +154,8 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 shown.forEach { category ->
+                    // Keyed so a reordered item keeps its state and its in-flight gesture.
+                    key(category.id) {
                     CategoryItem(
                         category = category,
                         expanded = category.id == expandedCategoryId,
@@ -155,10 +163,10 @@ fun HomeScreen(
                         tileActions = tileActions,
                         homeActions = homeActions,
                         reorder = reorder,
-                        reorderOffsetY = if (category.id == reorderingId) {
-                            { dragState.targetBounds(category.id)?.let { reorderPointerY - it.center.y } ?: 0f }
-                        } else null,
+                        reordering = category.id == reorderingId,
+                        reorderOffsetY = reorderOffset,
                     )
+                    }
                 }
                 Text(
                     text = "+ Add category",
@@ -201,7 +209,8 @@ private fun CategoryItem(
     tileActions: TileActions,
     homeActions: HomeActions,
     reorder: ReorderCallbacks,
-    reorderOffsetY: (() -> Float)?,
+    reordering: Boolean,
+    reorderOffsetY: (String) -> Float,
 ) {
     val haptics = LocalHapticFeedback.current
     var menuOpen by remember { mutableStateOf(false) }
@@ -245,50 +254,53 @@ private fun CategoryItem(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                // Drop-target bounds, outside the reorder translation.
-                .onGloballyPositioned {
-                    coords = it
-                    dragState.registerTarget(category.id, it.boundsInRoot())
-                }
-                .tapLongPressDrag(category.id, handler)
-                .semantics {
-                    onClick { homeActions.toggle(current.id); true }
-                    onLongClick { menuOpen = true; true }
-                }
-                .testTag("category:${category.name}")
-                .padding(vertical = 6.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = category.name,
-                style = LatchType.CategoryName,
-                textAlign = TextAlign.Center,
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .graphicsLayer {
-                        // Visual only: the parent's bounds (drop/reorder target) are not affected.
-                        val reordering = reorderOffsetY != null
-                        val s = hoverScale * bump.value * (if (reordering) 1.08f else 1f)
-                        scaleX = s
-                        scaleY = s
-                        translationY = reorderOffsetY?.invoke() ?: 0f
-                        alpha = when {
-                            reordering -> 0.9f
-                            dragState.isDragging && !hovered -> 0.75f
-                            else -> 1f
-                        }
-                    },
-            )
+                    .fillMaxWidth()
+                    // Drop-target bounds, outside the reorder translation.
+                    .onGloballyPositioned {
+                        coords = it
+                        dragState.registerTarget(category.id, it.boundsInRoot())
+                    }
+                    .tapLongPressDrag(category.id, handler)
+                    .semantics {
+                        onClick { actions.toggle(current.id); true }
+                        onLongClick { menuOpen = true; true }
+                    }
+                    .testTag("category:${category.name}")
+                    .padding(vertical = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = category.name,
+                    style = LatchType.CategoryName,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .graphicsLayer {
+                            // Visual only: the parent's bounds (drop/reorder target) are not affected.
+                            val s = hoverScale * bump.value * (if (reordering) 1.08f else 1f)
+                            scaleX = s
+                            scaleY = s
+                            translationY = if (reordering) reorderOffsetY(category.id) else 0f
+                            alpha = when {
+                                reordering -> 0.9f
+                                dragState.isDragging && !hovered -> 0.75f
+                                else -> 1f
+                            }
+                        },
+                )
+            }
+            // Sibling of the gesture node (not a child), so dismissing the popup when a reorder
+            // drag starts doesn't reset the in-flight gesture.
             Box(Modifier.align(Alignment.Center)) {
                 ContextMenu(
                     expanded = menuOpen,
                     onDismiss = { menuOpen = false },
                     actions = listOf(
-                        MenuAction("Rename") { homeActions.requestRename(current) },
-                        MenuAction("Delete") { homeActions.requestDelete(current) },
+                        MenuAction("Rename") { actions.requestRename(current) },
+                        MenuAction("Delete") { actions.requestDelete(current) },
                     ),
                 )
             }

@@ -2,9 +2,12 @@ package app.latch.ui
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.CancellationException
 
@@ -25,7 +28,15 @@ interface TapLongPressDragHandler {
  * - held until the timeout → `onLongPress` (show the context menu), then moving beyond touch slop
  *   starts a drag that reports every move until the pointer is released.
  */
-fun Modifier.tapLongPressDrag(key: Any?, handler: TapLongPressDragHandler): Modifier = pointerInput(key) {
+@Composable
+fun Modifier.tapLongPressDrag(key: Any?, handler: TapLongPressDragHandler): Modifier {
+    // The block must be a stable instance: in Compose 1.7 a new lambda resets the pointer input and
+    // cancels an in-flight gesture whenever the caller recomposes (e.g. while reordering).
+    val block: suspend PointerInputScope.() -> Unit = remember(handler) { { detectTapLongPressDrag(handler) } }
+    return pointerInput(key, block)
+}
+
+private suspend fun PointerInputScope.detectTapLongPressDrag(handler: TapLongPressDragHandler) {
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
         val slop = viewConfiguration.touchSlop
