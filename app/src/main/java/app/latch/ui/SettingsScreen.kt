@@ -36,8 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -195,8 +196,12 @@ private fun Toggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit,
         Switch(
             checked = checked,
             onCheckedChange = null,
-            // Shrunk to match the stepper buttons.
-            modifier = Modifier.scale(0.8f),
+            // Shrunk to match the stepper buttons, anchored right so its edge lines up with "+".
+            modifier = Modifier.graphicsLayer {
+                scaleX = 0.8f
+                scaleY = 0.8f
+                transformOrigin = TransformOrigin(1f, 0.5f)
+            },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.Black,
                 checkedTrackColor = Color.White,
