@@ -1,5 +1,6 @@
 package app.latch.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -24,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -37,14 +39,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.latch.R
 import app.latch.data.LatchSettings
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
@@ -86,11 +93,13 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
         )
         SettingsSection(
             title = "Appearance",
+            icon = R.drawable.ic_setting_appearance,
             expanded = openSection == SECTION_APPEARANCE,
             onToggle = { openSection = if (openSection == SECTION_APPEARANCE) null else SECTION_APPEARANCE }
         ) {
             Stepper(
                 label = "Apps per drawer",
+                icon = R.drawable.ic_setting_apps_per_drawer,
                 value = settings.appsPerDrawer,
                 range = LatchSettings.APPS_PER_DRAWER_RANGE,
                 onChange = actions::setAppsPerDrawer,
@@ -98,6 +107,7 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
             )
             Toggle(
                 label = "Gray icons",
+                icon = R.drawable.ic_setting_gray_icons,
                 checked = settings.grayIcons,
                 onChange = actions::setGrayIcons,
                 tag = "grayIcons"
@@ -109,16 +119,23 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
 private const val SECTION_APPEARANCE = "appearance"
 
 @Composable
-private fun SettingsSection(title: String, expanded: Boolean, onToggle: () -> Unit, content: @Composable () -> Unit) {
+private fun SettingsSection(
+    title: String,
+    @DrawableRes icon: Int,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    content: @Composable () -> Unit
+) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
+        IconLabel(
             text = title,
+            icon = icon,
+            iconSize = 24.dp,
             style = LatchType.CategoryName.copy(fontSize = 24.sp, lineHeight = 30.sp),
-            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
-                .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
                 .testTag("settingsSection:$title")
         )
         AnimatedVisibility(
@@ -140,20 +157,39 @@ private fun SettingsSection(title: String, expanded: Boolean, onToggle: () -> Un
 
 private val SettingLabel = TextStyle(color = LatchColors.Text, fontSize = 18.sp, fontWeight = FontWeight.Bold, shadow = TextShadow)
 
+/** Width reserved for every label's icon, so section titles and setting names start at the same x. */
+private val IconSlot = 24.dp
+
+/** [text] preceded by a white [icon], centered in a fixed-width slot. */
+@Composable
+private fun IconLabel(text: String, @DrawableRes icon: Int, iconSize: Dp, style: TextStyle, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.width(IconSlot), contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = LatchColors.Text,
+                modifier = Modifier.size(iconSize)
+            )
+        }
+        Text(text, style = style, modifier = Modifier.padding(start = 12.dp))
+    }
+}
+
 /** A "− value +" control for a whole number within [range]. */
 @Composable
-private fun Stepper(label: String, value: Int, range: IntRange, onChange: (Int) -> Unit, tag: String) {
+private fun Stepper(label: String, @DrawableRes icon: Int, value: Int, range: IntRange, onChange: (Int) -> Unit, tag: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = SettingLabel)
+        IconLabel(label, icon, iconSize = 20.dp, style = SettingLabel)
         Row(verticalAlignment = Alignment.CenterVertically) {
             StepButton("−", enabled = value > range.first, tag = "$tag:minus") { onChange(value - 1) }
             Text(
                 text = value.toString(),
-                style = SettingLabel.copy(fontSize = 22.sp),
+                style = SettingLabel,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(44.dp).testTag("$tag:value")
             )
@@ -166,7 +202,7 @@ private fun Stepper(label: String, value: Int, range: IntRange, onChange: (Int) 
 private fun StepButton(symbol: String, enabled: Boolean, tag: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(32.dp)
             .alpha(if (enabled) 1f else 0.3f)
             .clip(CircleShape)
             .background(Color.White)
@@ -174,13 +210,13 @@ private fun StepButton(symbol: String, enabled: Boolean, tag: String, onClick: (
             .testTag(tag),
         contentAlignment = Alignment.Center
     ) {
-        Text(symbol, style = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold))
+        Text(symbol, style = TextStyle(color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold))
     }
 }
 
 /** A labelled on/off switch. */
 @Composable
-private fun Toggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit, tag: String) {
+private fun Toggle(label: String, @DrawableRes icon: Int, checked: Boolean, onChange: (Boolean) -> Unit, tag: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -190,10 +226,16 @@ private fun Toggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, style = SettingLabel)
+        IconLabel(label, icon, iconSize = 20.dp, style = SettingLabel)
         Switch(
             checked = checked,
             onCheckedChange = null,
+            // Shrunk to match the stepper buttons, anchored right so its edge lines up with "+".
+            modifier = Modifier.graphicsLayer {
+                scaleX = 0.8f
+                scaleY = 0.8f
+                transformOrigin = TransformOrigin(1f, 0.5f)
+            },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.Black,
                 checkedTrackColor = Color.White,
