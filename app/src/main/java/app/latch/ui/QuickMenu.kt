@@ -105,7 +105,6 @@ class QuickMenuState {
     }
 }
 
-private val Highlight = Color(0xFFFFEB3B)
 private val ButtonSize = 56.dp
 private val RowGap = 16.dp
 
@@ -158,7 +157,7 @@ fun QuickMenu(state: QuickMenuState, actions: List<QuickAction>, modifier: Modif
 
 @Composable
 private fun QuickButton(action: QuickAction, highlighted: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val color by animateColorAsState(if (highlighted) Highlight else Color.White, label = "quickColor")
+    val color by animateColorAsState(if (highlighted) LocalAccentColor.current else Color.White, label = "quickColor")
     val shift by animateDpAsState(
         if (highlighted) (-56).dp else 0.dp,
         spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),

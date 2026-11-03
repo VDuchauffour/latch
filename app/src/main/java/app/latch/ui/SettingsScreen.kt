@@ -9,11 +9,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +60,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.latch.R
+import app.latch.data.AccentColor
 import app.latch.data.LatchSettings
 import app.latch.data.TileBackground
 import app.latch.domain.AppEntry
@@ -70,6 +74,7 @@ interface SettingsActions {
     fun setAppsPerDrawer(count: Int)
     fun setGrayIcons(enabled: Boolean)
     fun setTileBackground(background: TileBackground)
+    fun setAccentColor(color: AccentColor)
 
     /** Close the settings screen, e.g. after a tap on empty space. */
     fun close()
@@ -83,6 +88,7 @@ interface SettingsActions {
 fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: SettingsActions, modifier: Modifier = Modifier) {
     var openSection by rememberSaveable { mutableStateOf<String?>(null) }
     var tileBackgroundPicker by rememberSaveable { mutableStateOf(false) }
+    var accentColorPicker by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -129,6 +135,13 @@ fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: Setti
                 onClick = { tileBackgroundPicker = true },
                 tag = "tileBackground"
             )
+            Choice(
+                label = "Accent color",
+                icon = R.drawable.ic_setting_accent_color,
+                value = settings.accentColor.label,
+                onClick = { accentColorPicker = true },
+                tag = "accentColor"
+            )
         }
     }
     if (tileBackgroundPicker) {
@@ -140,6 +153,16 @@ fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: Setti
                 tileBackgroundPicker = false
             },
             onDismiss = { tileBackgroundPicker = false }
+        )
+    }
+    if (accentColorPicker) {
+        AccentColorDialog(
+            selected = settings.accentColor,
+            onSelect = {
+                actions.setAccentColor(it)
+                accentColorPicker = false
+            },
+            onDismiss = { accentColorPicker = false }
         )
     }
 }
@@ -320,7 +343,7 @@ private fun TileBackgroundDialog(
                             Modifier
                                 .size(width = 72.dp, height = 56.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = shade.alpha))
+                                .background(tileBackgroundColor(shade, LocalAccentColor.current))
                         )
                     }
                 }
@@ -339,6 +362,42 @@ private fun TileBackgroundDialog(
             }
         },
         confirmButton = { TextButton(onClick = { onSelect(shade) }, Modifier.testTag("tileBackgroundDialog:apply")) { Text("Apply") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
+}
+
+/** A grid of swatches; the chosen color is ringed in white and named below. Apply saves it. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccentColorDialog(selected: AccentColor, onSelect: (AccentColor) -> Unit, onDismiss: () -> Unit) {
+    var choice by rememberSaveable { mutableStateOf(selected) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Accent color") },
+        text = {
+            Column(Modifier.fillMaxWidth().testTag("accentColorDialog"), horizontalAlignment = Alignment.CenterHorizontally) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    maxItemsInEachRow = 5
+                ) {
+                    AccentColor.entries.forEach { color ->
+                        Box(
+                            Modifier
+                                .size(40.dp)
+                                .border(2.dp, if (color == choice) Color.White else Color.Transparent, CircleShape)
+                                .padding(4.dp)
+                                .clip(CircleShape)
+                                .background(Color(color.argb))
+                                .clickable(role = Role.RadioButton) { choice = color }
+                                .testTag("accentColorDialog:${color.name}")
+                        )
+                    }
+                }
+                Text(choice.label, modifier = Modifier.padding(top = 12.dp).testTag("accentColorDialog:label"))
+            }
+        },
+        confirmButton = { TextButton(onClick = { onSelect(choice) }, Modifier.testTag("accentColorDialog:apply")) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import app.latch.LatchApp
+import app.latch.data.AccentColor
 import app.latch.data.AppLauncher
 import app.latch.data.AppRepository
 import app.latch.data.CategoryStore
@@ -179,6 +180,10 @@ class LatchViewModel(
 
     fun setTileBackground(background: TileBackground) {
         viewModelScope.launch { settingsStore.setTileBackground(background) }
+    }
+
+    fun setAccentColor(color: AccentColor) {
+        viewModelScope.launch { settingsStore.setAccentColor(color) }
     }
 
     // --- Apps ---

@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.latch.data.AccentColor
 import app.latch.data.TileBackground
 import app.latch.data.sampleApp
 import app.latch.domain.AppEntry
@@ -208,6 +209,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
             override fun setGrayIcons(enabled: Boolean) = vm.setGrayIcons(enabled)
             override fun setTileBackground(background: TileBackground) = vm.setTileBackground(background)
+            override fun setAccentColor(color: AccentColor) = vm.setAccentColor(color)
             override fun close() = vm.setSettingsOpen(false)
         }
     }
@@ -233,7 +235,8 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
 
     CompositionLocalProvider(
         LocalGrayIcons provides state.settings.grayIcons,
-        LocalTileBackground provides state.settings.tileBackground
+        LocalTileBackground provides state.settings.tileBackground,
+        LocalAccentColor provides Color(state.settings.accentColor.argb)
     ) {
         BoxWithConstraints(Modifier.fillMaxSize().testTag("root")) {
             val heightPx = constraints.maxHeight.toFloat()

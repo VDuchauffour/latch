@@ -131,6 +131,13 @@ class LatchUiTest {
         rule.onNodeWithTag("tileBackgroundDialog:label").assertTextEquals(shade)
         rule.onNodeWithTag("tileBackgroundDialog:apply").performClick()
         rule.waitUntil(3_000) { rule.onAllNodesWithTag("tileBackgroundDialog").fetchSemanticsNodes().isEmpty() }
+        val accent = rule.onNodeWithTag("accentColor:value").fetchSemanticsNode()
+            .config[SemanticsProperties.Text].first().text
+        rule.onNodeWithTag("accentColor").performClick()
+        rule.onNodeWithTag("accentColorDialog").assertIsDisplayed()
+        rule.onNodeWithTag("accentColorDialog:label").assertTextEquals(accent)
+        rule.onNodeWithTag("accentColorDialog:apply").performClick()
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("accentColorDialog").fetchSemanticsNodes().isEmpty() }
         val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
             .config[SemanticsProperties.Text].first().text.toInt()
         val button = if (before < 7) "appsPerDrawer:plus" else "appsPerDrawer:minus"
