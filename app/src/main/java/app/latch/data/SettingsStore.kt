@@ -16,7 +16,8 @@ data class LatchSettings(
     val appsPerDrawer: Int = DEFAULT_APPS_PER_DRAWER,
     /** Show app icons in grayscale. */
     val grayIcons: Boolean = true,
-    val tileBackground: TileBackground = TileBackground.DEFAULT
+    val tileBackground: TileBackground = TileBackground.DEFAULT,
+    val accentColor: AccentColor = AccentColor.DEFAULT
 ) {
     companion object {
         const val DEFAULT_APPS_PER_DRAWER = 5
@@ -36,6 +37,24 @@ enum class TileBackground(val label: String, val alpha: Float) {
     }
 }
 
+/** Highlight color for selected and active elements, as 0xAARRGGBB. Yellow matches the original look. */
+enum class AccentColor(val label: String, val argb: Long) {
+    Yellow("Yellow", 0xFFFFFC33),
+    Lime("Lime", 0xFFB8FF33),
+    Mint("Mint", 0xFF33FFB5),
+    Cyan("Cyan", 0xFF33E0FF),
+    Blue("Blue", 0xFF4D8DFF),
+    Violet("Violet", 0xFFB36BFF),
+    Pink("Pink", 0xFFFF4FA3),
+    Coral("Coral", 0xFFFF5C5C),
+    Orange("Orange", 0xFFFF8A33),
+    Amber("Amber", 0xFFFFC233);
+
+    companion object {
+        val DEFAULT = Yellow
+    }
+}
+
 /** Persists [LatchSettings] next to the categories, in the same DataStore. */
 class SettingsStore(private val dataStore: DataStore<Preferences>) {
 
@@ -46,7 +65,8 @@ class SettingsStore(private val dataStore: DataStore<Preferences>) {
             appsPerDrawer = (prefs[APPS_PER_DRAWER] ?: LatchSettings.DEFAULT_APPS_PER_DRAWER)
                 .coerceIn(LatchSettings.APPS_PER_DRAWER_RANGE),
             grayIcons = prefs[GRAY_ICONS] ?: true,
-            tileBackground = TileBackground.entries.find { it.name == prefs[TILE_BACKGROUND] } ?: TileBackground.DEFAULT
+            tileBackground = TileBackground.entries.find { it.name == prefs[TILE_BACKGROUND] } ?: TileBackground.DEFAULT,
+            accentColor = AccentColor.entries.find { it.name == prefs[ACCENT_COLOR] } ?: AccentColor.DEFAULT
         )
     }
 
@@ -62,9 +82,14 @@ class SettingsStore(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[TILE_BACKGROUND] = background.name }
     }
 
+    suspend fun setAccentColor(color: AccentColor) {
+        dataStore.edit { it[ACCENT_COLOR] = color.name }
+    }
+
     private companion object {
         val APPS_PER_DRAWER = intPreferencesKey("apps_per_drawer")
         val GRAY_ICONS = booleanPreferencesKey("gray_icons")
         val TILE_BACKGROUND = stringPreferencesKey("tile_background")
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
     }
 }

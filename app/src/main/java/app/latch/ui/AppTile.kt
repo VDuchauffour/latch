@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.latch.data.AccentColor
 import app.latch.data.IconLoader
 import app.latch.data.TileBackground
 import app.latch.domain.AppEntry
@@ -64,6 +65,9 @@ val LocalIconLoader = staticCompositionLocalOf<IconLoader> { error("No IconLoade
 val LocalGrayIcons = compositionLocalOf { false }
 
 val LocalTileBackground = compositionLocalOf { TileBackground.DEFAULT }
+
+/** The accent color chosen in Latch settings → Appearance. */
+val LocalAccentColor = compositionLocalOf { Color(AccentColor.DEFAULT.argb) }
 
 private val GrayscaleFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
