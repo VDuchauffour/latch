@@ -30,7 +30,7 @@
 
 - A full-screen page over a lightly dimmed wallpaper with a centered "Latch settings" title; home's drawers and search bar fade out while it is open; Back, Home, or a tap on empty space closes it.
 - Settings are grouped in sections that open and close like drawers on home (tap the name; one at a time).
-- Appearance: Apps per drawer (3–7, default 5) sets how many app tiles fit across an open drawer; extra apps scroll sideways.
+- Appearance: Apps per drawer (3–7, default 5) sets how many app tiles fit across an open drawer; extra apps wrap onto new lines.
 - Settings are saved to DataStore.
 
 ## App drawer
@@ -56,8 +56,8 @@
 - Long-press and move a drawer tile to add the app to a category. The drawer closes automatically so the categories are visible.
 - Long-press and move a tile from one category to another to move it.
 - The category under the pointer is highlighted while hovering, and it plays a short "bump" animation when the app is dropped.
-- Long-press and move a tile within an open drawer to reorder it. A vertical white line shows where the app will land, between two tiles (or before the first or after the last one); the dragged tile is dimmed in the meantime.
-- Dropping into another open drawer's row of apps places the app at that position too.
+- Long-press and move a tile within an open drawer to reorder it. A vertical white line shows where the app will land, between two tiles (or at the start or end of a line); the dragged tile is dimmed in the meantime.
+- Dropping into another open drawer's apps places the app at that position too.
 - Duplicates are ignored, and dropping onto the source category's name does nothing.
 
 ## Category management

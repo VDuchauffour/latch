@@ -68,7 +68,7 @@ class DragState {
 
     fun targetBounds(categoryId: String): Rect? = targets[categoryId]
 
-    /** An open category's row of apps, in root coordinates. */
+    /** An open category's apps area (all its lines of tiles), in root coordinates. */
     fun registerRow(categoryId: String, boundsInRoot: Rect) {
         rows[categoryId] = boundsInRoot
     }
@@ -78,7 +78,7 @@ class DragState {
         tiles.remove(categoryId)
     }
 
-    /** A tile at [index] in an open category's row; [boundsInRoot] is unclipped. */
+    /** A tile at [index] in an open category's apps. */
     fun registerTile(categoryId: String, key: AppKey, index: Int, boundsInRoot: Rect) {
         tiles.getOrPut(categoryId) { HashMap() }[key] = TileSlot(index, boundsInRoot)
     }
@@ -102,23 +102,30 @@ class DragState {
     }
 
     /**
-     * Insertion point under [point] inside an open category's row: before the first visible tile
-     * whose center is right of the pointer, else after the last one. Null when it would leave the
-     * dragged app where it already is.
+     * Insertion point under [point] inside an open category's apps: on the line of tiles nearest the
+     * pointer vertically, before the first tile whose center is right of the pointer, else after the
+     * line's last tile. Null when it would leave the dragged app where it already is.
      */
     private fun insertionAt(point: Offset): Insertion? {
         val app = dragged ?: return null
         val categoryId = rows.entries.firstOrNull { it.value.contains(point) }?.key ?: return null
-        val slots = tiles[categoryId]?.values?.sortedBy { it.index }.orEmpty()
-        if (slots.isEmpty()) return null
-        val right = slots.firstOrNull { point.x < it.bounds.center.x }
-        val left = slots.lastOrNull { it.index < (right?.index ?: Int.MAX_VALUE) }
-        val beforeIndex = right?.index ?: (slots.last().index + 1)
+        val slots = tiles[categoryId]?.values.orEmpty()
+        val nearest = slots.minByOrNull { verticalDistance(point.y, it.bounds) } ?: return null
+        val line = slots.filter { it.bounds.top == nearest.bounds.top }.sortedBy { it.index }
+        val right = line.firstOrNull { point.x < it.bounds.center.x }
+        val left = line.lastOrNull { it.index < (right?.index ?: Int.MAX_VALUE) }
+        val beforeIndex = right?.index ?: (line.last().index + 1)
         if (app.sourceCategoryId == categoryId) {
             val from = tiles[categoryId]?.get(app.entry.key)?.index
             if (from != null && (beforeIndex == from || beforeIndex == from + 1)) return null
         }
         return Insertion(categoryId, beforeIndex, left?.bounds, right?.bounds)
+    }
+
+    private fun verticalDistance(y: Float, r: Rect): Float = when {
+        y < r.top -> r.top - y
+        y > r.bottom -> y - r.bottom
+        else -> 0f
     }
 
     /**
