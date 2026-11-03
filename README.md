@@ -1,6 +1,17 @@
 # Latch
 
+[![Release](https://img.shields.io/github/v/release/VDuchauffour/latch?style=flat-square)](https://github.com/VDuchauffour/latch/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/VDuchauffour/latch/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/VDuchauffour/latch/actions/workflows/ci.yml)
+[![Release APK](https://img.shields.io/github/actions/workflow/status/VDuchauffour/latch/release.yml?style=flat-square&label=release%20APK)](https://github.com/VDuchauffour/latch/actions/workflows/release.yml)
+[![Downloads](https://img.shields.io/github/downloads/VDuchauffour/latch/total?style=flat-square)](https://github.com/VDuchauffour/latch/releases)
+[![License](https://img.shields.io/github/license/VDuchauffour/latch?style=flat-square)](LICENSE)
+[![Get it on Obtainium](https://img.shields.io/badge/Get%20it%20on-Obtainium-4A148C?style=flat-square&logo=obtainium&logoColor=white)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22app.latch%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FVDuchauffour%2Flatch%22%2C%22author%22%3A%22VDuchauffour%22%2C%22name%22%3A%22Latch%22%2C%22supportFixedAPKURL%22%3Afalse%7D)
+
 A minimal, text-first Android launcher: a centered list of user-defined **categories** that expand into their apps, plus a swipe-up **A–Z app drawer**. Kotlin + Jetpack Compose, single activity. See [PLAN.md](PLAN.md) for the spec and architecture.
+
+## Install
+
+Download `latch-vX.Y.Z.apk` from the [latest release](https://github.com/VDuchauffour/latch/releases/latest), or add Latch to [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22app.latch%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FVDuchauffour%2Flatch%22%2C%22author%22%3A%22VDuchauffour%22%2C%22name%22%3A%22Latch%22%2C%22supportFixedAPKURL%22%3Afalse%7D) to get updates automatically (or add `https://github.com/VDuchauffour/latch` as an app in Obtainium by hand).
 
 ## Build & run
 
@@ -23,11 +34,23 @@ With multiple devices/emulators connected, target one via `adb`'s serial:
 export ANDROID_SERIAL=emulator-5554 # gradle installDebug and connected tests use only this device
 ```
 
-Release build (R8 + resource shrinking; signed with the debug key for convenience):
+Release build (R8 + resource shrinking; signed with the debug key unless the `LATCH_KEYSTORE_*` env vars are set):
 
 ```sh
 ./gradlew assembleRelease
 ```
+
+## Releasing
+
+[release-drafter](.github/release-drafter.yml) keeps a draft release up to date as PRs merge. Publishing it triggers the [Release APK](.github/workflows/release.yml) workflow, which builds the APK with the version from the tag (`v1.2.3` → `versionName` 1.2.3, `versionCode` 10203), signs it with the release key, and attaches `latch-v1.2.3.apk` to the release. Re-run it for an existing tag from the Actions tab.
+
+One-time setup of the release key (stored outside the repo and uploaded as the `LATCH_KEYSTORE_BASE64`, `LATCH_KEYSTORE_PASSWORD`, `LATCH_KEY_ALIAS`, `LATCH_KEY_PASSWORD` repository secrets):
+
+```sh
+just release-keystore # defaults to ~/.android/latch-release.jks
+```
+
+Back the keystore up: Android (and Obtainium) only install updates signed with the same key, so losing it means every user has to uninstall and reinstall.
 
 ## Tests
 
