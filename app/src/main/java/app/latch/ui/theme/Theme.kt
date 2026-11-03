@@ -16,10 +16,9 @@ object LatchColors {
     val TextDim = Color.White.copy(alpha = 0.6f)
     val Tile = Color.White.copy(alpha = 0.08f)
     val TileHover = Color.White.copy(alpha = 0.18f)
-    val DrawerScrim = Color(0xFF0B0B0B).copy(alpha = 0.82f)
 
-    /** Light dimming behind Latch settings; the wallpaper stays visible. */
-    val SettingsScrim = Color(0xFF0B0B0B).copy(alpha = 0.30f)
+    /** Light dimming behind full-screen overlays (all apps, Latch settings); the wallpaper stays visible. */
+    val OverlayScrim = Color(0xFF0B0B0B).copy(alpha = 0.30f)
     val HeaderScrim = Color(0xFF0B0B0B).copy(alpha = 0.55f)
     val Placeholder = Color.White.copy(alpha = 0.15f)
     val SearchPanel = Color(0xFF3A3A3A).copy(alpha = 0.72f)
