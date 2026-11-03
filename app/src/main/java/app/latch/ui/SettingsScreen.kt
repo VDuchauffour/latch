@@ -99,12 +99,12 @@ private fun SettingsSection(title: String, expanded: Boolean, onToggle: () -> Un
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = title,
-            style = LatchType.CategoryName.copy(fontSize = 32.sp, lineHeight = 38.sp),
-            textAlign = TextAlign.Center,
+            style = LatchType.CategoryName.copy(fontSize = 24.sp, lineHeight = 30.sp),
+            textAlign = TextAlign.Start,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
-                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
                 .testTag("settingsSection:$title")
         )
         AnimatedVisibility(
