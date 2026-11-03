@@ -157,10 +157,6 @@ class LatchViewModel(
 
     fun expandNotifications() = launcher.expandNotifications()
 
-    fun openWallpaperPicker() = launcher.openWallpaperPicker()
-
-    fun openHomeAppSettings() = launcher.openHomeAppSettings()
-
     fun openSystemSettings() = launcher.openSystemSettings()
 
     // --- Categories ---

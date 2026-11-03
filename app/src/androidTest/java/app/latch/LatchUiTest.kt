@@ -108,10 +108,10 @@ class LatchUiTest {
         waitForTag("searchIcon")
         rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
         rule.onNodeWithTag("quickMenu").assertIsDisplayed()
-        listOf("Add category", "Wallpaper", "Default home app", "Android settings").forEach {
+        listOf("Add drawer", "Android settings").forEach {
             rule.onNodeWithText(it).assertIsDisplayed()
         }
-        rule.onNodeWithText("Add category").performClick()
+        rule.onNodeWithText("Add drawer").performClick()
         rule.onNodeWithText("New category").assertIsDisplayed()
     }
 

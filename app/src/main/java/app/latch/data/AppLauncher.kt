@@ -37,10 +37,6 @@ class AppLauncher(private val context: Context, private val repository: AppRepos
         }.onFailure { Log.w("AppLauncher", "Cannot expand notifications", it) }
     }
 
-    fun openWallpaperPicker() = startSystem(Intent.createChooser(Intent(Intent.ACTION_SET_WALLPAPER), "Set wallpaper"))
-
-    fun openHomeAppSettings() = startSystem(Intent(Settings.ACTION_HOME_SETTINGS))
-
     fun openSystemSettings() = startSystem(Intent(Settings.ACTION_SETTINGS))
 
     private fun startSystem(intent: Intent) {

@@ -21,7 +21,7 @@
 - Long-press the magnifying glass in the search bar to open a column of round buttons above it over a dimmed home. Tapping the magnifying glass still starts a search.
 - Without lifting your finger, slide up and down: the button under it turns yellow and shifts left, with a haptic tick. Release to run it.
 - If you release without a highlight, the menu stays open: tap a button to run it, or tap outside or press Back to close it.
-- Buttons: Add category, Wallpaper (system picker), Default home app (system Home setting), Android settings.
+- Buttons: Add drawer (opens the new-category dialog) and Android settings (gear icon, opens the system Settings app).
 
 ## App drawer
 - Swipe up from home to open it, swipe down to close it; it works as a bottom sheet together with list scrolling.

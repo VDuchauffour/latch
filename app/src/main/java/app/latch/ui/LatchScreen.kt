@@ -175,9 +175,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     }
     val quickActions = remember(vm) {
         listOf(
-            QuickAction("Add category", QuickIcon.AddCategory) { dialog = HomeDialog.Add },
-            QuickAction("Wallpaper", QuickIcon.Wallpaper, vm::openWallpaperPicker),
-            QuickAction("Default home app", QuickIcon.HomeApp, vm::openHomeAppSettings),
+            QuickAction("Add drawer", QuickIcon.AddDrawer) { dialog = HomeDialog.Add },
             QuickAction("Android settings", QuickIcon.Settings, vm::openSystemSettings)
         )
     }
