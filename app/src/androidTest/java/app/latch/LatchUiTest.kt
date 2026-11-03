@@ -1,5 +1,6 @@
 package app.latch
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -101,5 +102,31 @@ class LatchUiTest {
         rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
         rule.onNodeWithText("New category").assertIsDisplayed()
         rule.onNode(hasTestTag("nameField")).assertIsDisplayed()
+    }
+
+    @Test fun longPressSearchIconOpensQuickMenu() {
+        waitForTag("searchIcon")
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithTag("quickMenu").assertIsDisplayed()
+        listOf("Add category", "Wallpaper", "Default home app", "Android settings").forEach {
+            rule.onNodeWithText(it).assertIsDisplayed()
+        }
+        rule.onNodeWithText("Add category").performClick()
+        rule.onNodeWithText("New category").assertIsDisplayed()
+    }
+
+    @Test fun slidingFromSearchIconRunsHighlightedButton() {
+        waitForTag("searchIcon")
+        val icon = rule.onNodeWithTag("searchIcon")
+        icon.performTouchInput { down(center) }
+        rule.mainClock.advanceTimeBy(1_000)
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("quickAction:0").fetchSemanticsNodes().isNotEmpty() }
+        val targetY = rule.onNodeWithTag("quickAction:0").fetchSemanticsNode().boundsInRoot.center.y
+        val iconTop = icon.fetchSemanticsNode().boundsInRoot.top
+        icon.performTouchInput {
+            moveTo(Offset(center.x, targetY - iconTop))
+            up()
+        }
+        rule.onNodeWithText("New category").assertIsDisplayed()
     }
 }

@@ -92,6 +92,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val dragState = remember { DragState() }
     val drawerList = rememberLazyListState()
     var dialog by remember { mutableStateOf<HomeDialog?>(null) }
+    val quickMenu = remember { QuickMenuState() }
     val focusManager = LocalFocusManager.current
 
     val sheet = remember {
@@ -172,6 +173,30 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             override fun dragCancel() = dragState.cancel()
         }
     }
+    val quickActions = remember(vm) {
+        listOf(
+            QuickAction("Add category", QuickIcon.AddCategory) { dialog = HomeDialog.Add },
+            QuickAction("Wallpaper", QuickIcon.Wallpaper, vm::openWallpaperPicker),
+            QuickAction("Default home app", QuickIcon.HomeApp, vm::openHomeAppSettings),
+            QuickAction("Android settings", QuickIcon.Settings, vm::openSystemSettings)
+        )
+    }
+    val quickGesture = remember(vm, quickMenu, quickActions) {
+        object : QuickMenuGesture {
+            override fun open() {
+                focusManager.clearFocus()
+                vm.clearSearch()
+                vm.collapseAll()
+                quickMenu.open()
+            }
+            override fun move(rootPosition: Offset) = quickMenu.pointerAt(rootPosition)
+            override fun release() {
+                quickActions.getOrNull(quickMenu.release())?.onClick?.invoke()
+            }
+        }
+    }
+    LaunchedEffect(drawerVisible) { if (drawerVisible) quickMenu.close() }
+    BackHandler(enabled = quickMenu.isOpen) { quickMenu.close() }
     val homeActions = remember(vm) {
         object : HomeActions {
             override fun toggle(categoryId: String) {
@@ -265,6 +290,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     if (focused) vm.collapseAll()
                 },
                 onDismiss = ::endSearch,
+                quickMenu = quickGesture,
                 tileActions = tileActions,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -294,6 +320,8 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 listState = drawerList
             )
         }
+
+        QuickMenu(quickMenu, quickActions)
 
         DragShadow(dragState)
     }
