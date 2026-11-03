@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -66,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.latch.data.TileBackground
+import app.latch.data.sampleApp
 import app.latch.domain.AppEntry
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
@@ -348,7 +350,9 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
                 exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
             ) {
-                SettingsScreen(state.settings, settingsActions)
+                val context = LocalContext.current
+                val sample = remember(state.drawerSections) { sampleApp(context, state.drawerSections.flatMap { it.apps }) }
+                SettingsScreen(state.settings, sample, settingsActions)
             }
 
             InsertionLine(dragState)

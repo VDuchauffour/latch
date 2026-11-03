@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import app.latch.R
 import app.latch.data.LatchSettings
 import app.latch.data.TileBackground
+import app.latch.domain.AppEntry
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 import app.latch.ui.theme.TextShadow
@@ -79,7 +80,7 @@ interface SettingsActions {
  * opened and closed like drawers on home. Tapping empty space closes the screen.
  */
 @Composable
-fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: Modifier = Modifier) {
+fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: SettingsActions, modifier: Modifier = Modifier) {
     var openSection by rememberSaveable { mutableStateOf<String?>(null) }
     var tileBackgroundPicker by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -133,6 +134,7 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
     if (tileBackgroundPicker) {
         TileBackgroundDialog(
             selected = settings.tileBackground,
+            sampleApp = sampleApp,
             onSelect = {
                 actions.setTileBackground(it)
                 tileBackgroundPicker = false
@@ -290,7 +292,12 @@ private fun Choice(label: String, @DrawableRes icon: Int, value: String, onClick
 }
 
 @Composable
-private fun TileBackgroundDialog(selected: TileBackground, onSelect: (TileBackground) -> Unit, onDismiss: () -> Unit) {
+private fun TileBackgroundDialog(
+    selected: TileBackground,
+    sampleApp: AppEntry?,
+    onSelect: (TileBackground) -> Unit,
+    onDismiss: () -> Unit
+) {
     val shades = TileBackground.entries
     var index by rememberSaveable { mutableIntStateOf(selected.ordinal) }
     val shade = shades[index]
@@ -301,11 +308,22 @@ private fun TileBackgroundDialog(selected: TileBackground, onSelect: (TileBackgr
             Column(Modifier.fillMaxWidth().testTag("tileBackgroundDialog"), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     Modifier
-                        .size(width = 72.dp, height = 56.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(20.dp))
                         .background(Color.Black.copy(alpha = 0.6f))
-                        .background(Color.White.copy(alpha = shade.alpha))
-                )
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (sampleApp != null) {
+                        TilePreview(sampleApp, shade, Modifier.width(84.dp).testTag("tileBackgroundDialog:sample"))
+                    } else {
+                        Box(
+                            Modifier
+                                .size(width = 72.dp, height = 56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = shade.alpha))
+                        )
+                    }
+                }
                 Text(shade.label, modifier = Modifier.padding(top = 12.dp).testTag("tileBackgroundDialog:label"))
                 Slider(
                     value = index.toFloat(),

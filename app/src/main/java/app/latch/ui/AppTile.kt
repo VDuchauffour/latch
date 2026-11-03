@@ -163,18 +163,7 @@ fun AppTile(
                 .testTag("$tagPrefix:${entry.label}"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
-        ) {
-            AppIcon(entry.key, Modifier.size(42.dp))
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = entry.label,
-                style = LatchType.TileLabel,
-                maxLines = 2,
-                minLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-        }
+        ) { TileContent(entry) }
         ContextMenu(
             expanded = menuOpen,
             onDismiss = { menuOpen = false },
@@ -187,6 +176,32 @@ private fun tileBackgroundColor(background: TileBackground, highlighted: Boolean
     Color.White.copy(alpha = background.alpha + if (highlighted) TILE_HIGHLIGHT_ALPHA else 0f)
 
 private const val TILE_HIGHLIGHT_ALPHA = 0.10f
+
+@Composable
+fun TilePreview(entry: AppEntry, background: TileBackground, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(tileBackgroundColor(background, highlighted = false))
+            .padding(horizontal = 4.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) { TileContent(entry) }
+}
+
+@Composable
+private fun TileContent(entry: AppEntry) {
+    AppIcon(entry.key, Modifier.size(42.dp))
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = entry.label,
+        style = LatchType.TileLabel,
+        maxLines = 2,
+        minLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center
+    )
+}
 
 @Composable
 fun AppIcon(key: AppKey, modifier: Modifier = Modifier) {
