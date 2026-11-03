@@ -153,7 +153,7 @@ private fun Stepper(label: String, value: Int, range: IntRange, onChange: (Int) 
             StepButton("−", enabled = value > range.first, tag = "$tag:minus") { onChange(value - 1) }
             Text(
                 text = value.toString(),
-                style = SettingLabel.copy(fontSize = 22.sp),
+                style = SettingLabel,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(44.dp).testTag("$tag:value")
             )
