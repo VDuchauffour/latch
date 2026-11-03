@@ -38,3 +38,24 @@ repos:
           - mdformat-tables
           - mdformat-frontmatter
           - mdformat-shfmt
+  - repo: local
+    hooks:
+      - id: just-fmt-check
+        name: Format (Spotless / ktlint)
+        entry: just fmt-check
+        language: system
+        types:
+          - kotlin
+        pass_filenames: false
+      - id: just-lint
+        name: Android Lint
+        entry: just lint
+        language: system
+        files: ^(app/|gradle/|.*\.gradle\.kts$|gradle\.properties$)
+        pass_filenames: false
+      - id: just-test
+        name: Unit tests
+        entry: just test
+        language: system
+        files: ^(app/|gradle/|.*\.gradle\.kts$|gradle\.properties$)
+        pass_filenames: false
