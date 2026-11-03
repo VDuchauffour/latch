@@ -56,7 +56,9 @@
 - Long-press and move a drawer tile to add the app to a category. The drawer closes automatically so the categories are visible.
 - Long-press and move a tile from one category to another to move it.
 - The category under the pointer is highlighted while hovering, and it plays a short "bump" animation when the app is dropped.
-- Duplicates are ignored, and dropping onto the source category does nothing.
+- Long-press and move a tile within an open drawer to reorder it. A vertical white line shows where the app will land, between two tiles (or before the first or after the last one); the dragged tile is dimmed in the meantime.
+- Dropping into another open drawer's row of apps places the app at that position too.
+- Duplicates are ignored, and dropping onto the source category's name does nothing.
 
 ## Category management
 

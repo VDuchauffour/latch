@@ -201,9 +201,19 @@ class LatchViewModel(
 
     fun removeFromCategory(id: String, app: AppKey) = edit { CategoryOps.removeApp(it, id, app) }
 
-    /** Drop handler: from the drawer = add, from another category = move. */
-    fun drop(app: AppKey, sourceCategoryId: String?, targetCategoryId: String) = edit {
-        if (sourceCategoryId == null) {
+    /**
+     * Drop handler: from the drawer = add, from another category = move. With [beforeIndex] the app
+     * is placed at that position in the target (which also reorders it within its own category).
+     */
+    fun drop(app: AppKey, sourceCategoryId: String?, targetCategoryId: String, beforeIndex: Int? = null) = edit {
+        if (beforeIndex != null) {
+            val removed = if (sourceCategoryId != null && sourceCategoryId != targetCategoryId) {
+                CategoryOps.removeApp(it, sourceCategoryId, app)
+            } else {
+                it
+            }
+            CategoryOps.placeApp(removed, targetCategoryId, app, beforeIndex)
+        } else if (sourceCategoryId == null) {
             CategoryOps.addApp(it, targetCategoryId, app)
         } else {
             CategoryOps.moveApp(it, sourceCategoryId, targetCategoryId, app)

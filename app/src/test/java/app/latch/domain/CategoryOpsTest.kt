@@ -54,6 +54,24 @@ class CategoryOpsTest {
         assertEquals(cats(), CategoryOps.moveApp(cats(), "t", "missing", chat))
     }
 
+    @Test fun `place reorders within a category`() {
+        val camera = AppKey("com.example.camera", "MainActivity", 0)
+        val three = listOf(Category("t", "Talk", 0, listOf(chat, music, camera)))
+        fun order(index: Int, app: AppKey) = CategoryOps.placeApp(three, "t", app, index).first().apps
+        assertEquals(listOf(music, chat, camera), order(2, chat))
+        assertEquals(listOf(music, camera, chat), order(3, chat))
+        assertEquals(listOf(camera, chat, music), order(0, camera))
+        assertEquals(listOf(chat, camera, music), order(1, camera))
+        assertEquals(listOf(chat, music, camera), order(1, chat)) // before itself: no-op
+        assertEquals(listOf(chat, music, camera), order(99, camera)) // clamped to the end
+    }
+
+    @Test fun `place inserts a new app at the given position`() {
+        val result = CategoryOps.placeApp(cats(), "t", music, 0)
+        assertEquals(listOf(music, chat), result.first { it.id == "t" }.apps)
+        assertEquals(emptyList<AppKey>(), result.first { it.id == "l" }.apps)
+    }
+
     @Test fun `rename trims and ignores blank`() {
         assertEquals("Chat", CategoryOps.rename(cats(), "t", " Chat ").first().name)
         assertEquals("Talk", CategoryOps.rename(cats(), "t", "").first().name)

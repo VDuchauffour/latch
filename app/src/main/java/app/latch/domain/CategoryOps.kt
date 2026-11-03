@@ -30,6 +30,22 @@ object CategoryOps {
     fun removeApp(categories: List<Category>, id: String, app: AppKey): List<Category> =
         normalize(categories.map { if (it.id == id) it.copy(apps = it.apps - app) else it })
 
+    /**
+     * Places [app] in category [id] just before the app currently at [beforeIndex] (an index into the
+     * category's apps *before* the move; clamped, so `apps.size` means the end). If the app is already
+     * in the category it is moved there, otherwise it is inserted.
+     */
+    fun placeApp(categories: List<Category>, id: String, app: AppKey, beforeIndex: Int): List<Category> = normalize(
+        categories.map { c ->
+            if (c.id != id) return@map c
+            val at = beforeIndex.coerceIn(0, c.apps.size)
+            val from = c.apps.indexOf(app)
+            val target = if (from in 0 until at) at - 1 else at
+            val rest = c.apps - app
+            c.copy(apps = rest.toMutableList().apply { add(target.coerceAtMost(rest.size), app) })
+        }
+    )
+
     /** Moves [app] from one category to another. Same source and target is a no-op. */
     fun moveApp(categories: List<Category>, fromId: String, toId: String, app: AppKey): List<Category> {
         if (fromId == toId || categories.none { it.id == toId }) return normalize(categories)
