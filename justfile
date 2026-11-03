@@ -66,6 +66,10 @@ run AVD="latch":
     adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
     ./gradlew installDebug
 
+# Capture the README screenshots into assets/screenshots (boots the AVD if no device is connected)
+screenshots AVD="latch":
+    scripts/screenshots.sh {{ AVD }}
+
 # Stop the running emulator
 emu-stop:
     adb emu kill || adb devices
