@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.latch.domain.Section
-import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -118,7 +117,6 @@ fun AppDrawer(sections: List<Section>, actions: TileActions, listState: LazyList
                         style = LatchType.SectionHeader,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(LatchColors.HeaderScrim, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp, vertical = 4.dp)
                     )
                 }
