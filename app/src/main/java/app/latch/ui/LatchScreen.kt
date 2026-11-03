@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -246,6 +247,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             }
         }
         val drawerScroll = remember(sheet) { drawerNestedScroll(sheet) }
+        // Home's drawers and search bar fade out while Latch settings is open.
+        val homeAlpha by animateFloatAsState(
+            targetValue = if (state.settingsOpen) 0f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+            label = "homeAlpha"
+        )
 
         // Readability scrim over bright wallpapers.
         Box(
@@ -262,7 +269,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 .nestedScroll(homeScroll)
                 .graphicsLayer {
                     val p = progress()
-                    alpha = 1f - p
+                    alpha = (1f - p) * homeAlpha
                     translationY = -p * 80.dp.toPx()
                 }
         ) {

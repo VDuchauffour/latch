@@ -28,7 +28,7 @@
 
 ## Latch settings
 
-- A full-screen page over home with a centered "Latch settings" title; Back, Home, or a tap on empty space closes it.
+- A full-screen page over the wallpaper with a centered "Latch settings" title; home's drawers and search bar fade out while it is open; Back, Home, or a tap on empty space closes it.
 - Settings are grouped in sections that open and close like drawers on home (tap the name; one at a time).
 - Appearance: Apps per drawer (3–7, default 5) sets how many app tiles fit across an open drawer; extra apps scroll sideways.
 - Settings are saved to DataStore.
