@@ -1,3 +1,5 @@
+set dotenv-load
+
 emulator := "mise x android-sdk -- emulator"
 
 default:
@@ -56,3 +58,7 @@ lint:
 # Remove build artifacts
 clean:
     ./gradlew clean
+
+# Stop Gradle daemons (needed after changing .env / JAVA_TOOL_OPTIONS)
+gradle-stop:
+    ./gradlew --stop
