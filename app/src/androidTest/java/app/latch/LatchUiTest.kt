@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -123,6 +124,13 @@ class LatchUiTest {
         rule.onNodeWithTag("settingsSection:Appearance").performClick()
         rule.onNodeWithText("Apps per drawer").assertIsDisplayed()
         rule.onNodeWithText("Gray icons").assertIsDisplayed()
+        val shade = rule.onNodeWithTag("tileBackground:value").fetchSemanticsNode()
+            .config[SemanticsProperties.Text].first().text
+        rule.onNodeWithTag("tileBackground").performClick()
+        rule.onNodeWithTag("tileBackgroundDialog").assertIsDisplayed()
+        rule.onNodeWithTag("tileBackgroundDialog:label").assertTextEquals(shade)
+        rule.onNodeWithTag("tileBackgroundDialog:apply").performClick()
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("tileBackgroundDialog").fetchSemanticsNodes().isEmpty() }
         val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
             .config[SemanticsProperties.Text].first().text.toInt()
         val button = if (before < 7) "appsPerDrawer:plus" else "appsPerDrawer:minus"

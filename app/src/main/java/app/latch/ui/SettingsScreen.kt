@@ -24,13 +24,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -53,14 +58,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.latch.R
 import app.latch.data.LatchSettings
+import app.latch.data.TileBackground
+import app.latch.domain.AppEntry
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 import app.latch.ui.theme.TextShadow
+import kotlin.math.roundToInt
 
 /** Callbacks from the settings screen to the root. */
 interface SettingsActions {
     fun setAppsPerDrawer(count: Int)
     fun setGrayIcons(enabled: Boolean)
+    fun setTileBackground(background: TileBackground)
 
     /** Close the settings screen, e.g. after a tap on empty space. */
     fun close()
@@ -71,8 +80,9 @@ interface SettingsActions {
  * opened and closed like drawers on home. Tapping empty space closes the screen.
  */
 @Composable
-fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: Modifier = Modifier) {
+fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: SettingsActions, modifier: Modifier = Modifier) {
     var openSection by rememberSaveable { mutableStateOf<String?>(null) }
+    var tileBackgroundPicker by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -112,7 +122,25 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
                 onChange = actions::setGrayIcons,
                 tag = "grayIcons"
             )
+            Choice(
+                label = "Tile background",
+                icon = R.drawable.ic_setting_tile_background,
+                value = settings.tileBackground.label,
+                onClick = { tileBackgroundPicker = true },
+                tag = "tileBackground"
+            )
         }
+    }
+    if (tileBackgroundPicker) {
+        TileBackgroundDialog(
+            selected = settings.tileBackground,
+            sampleApp = sampleApp,
+            onSelect = {
+                actions.setTileBackground(it)
+                tileBackgroundPicker = false
+            },
+            onDismiss = { tileBackgroundPicker = false }
+        )
     }
 }
 
@@ -245,4 +273,72 @@ private fun Toggle(label: String, @DrawableRes icon: Int, checked: Boolean, onCh
             )
         )
     }
+}
+
+@Composable
+private fun Choice(label: String, @DrawableRes icon: Int, value: String, onClick: () -> Unit, tag: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 4.dp)
+            .testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconLabel(label, icon, iconSize = 20.dp, style = SettingLabel)
+        Text(value, style = SettingLabel.copy(color = LatchColors.TextDim), modifier = Modifier.testTag("$tag:value"))
+    }
+}
+
+@Composable
+private fun TileBackgroundDialog(
+    selected: TileBackground,
+    sampleApp: AppEntry?,
+    onSelect: (TileBackground) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val shades = TileBackground.entries
+    var index by rememberSaveable { mutableIntStateOf(selected.ordinal) }
+    val shade = shades[index]
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Tile background") },
+        text = {
+            Column(Modifier.fillMaxWidth().testTag("tileBackgroundDialog"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (sampleApp != null) {
+                        TilePreview(sampleApp, shade, Modifier.width(84.dp).testTag("tileBackgroundDialog:sample"))
+                    } else {
+                        Box(
+                            Modifier
+                                .size(width = 72.dp, height = 56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = shade.alpha))
+                        )
+                    }
+                }
+                Text(shade.label, modifier = Modifier.padding(top = 12.dp).testTag("tileBackgroundDialog:label"))
+                Slider(
+                    value = index.toFloat(),
+                    onValueChange = { index = it.roundToInt() },
+                    valueRange = 0f..shades.lastIndex.toFloat(),
+                    steps = shades.size - 2,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("tileBackgroundDialog:slider")
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(shades.first().label)
+                    Text(shades.last().label)
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onSelect(shade) }, Modifier.testTag("tileBackgroundDialog:apply")) { Text("Apply") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
 }

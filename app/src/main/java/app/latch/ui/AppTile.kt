@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.latch.data.IconLoader
+import app.latch.data.TileBackground
 import app.latch.domain.AppEntry
 import app.latch.domain.AppKey
 import app.latch.ui.theme.LatchColors
@@ -59,6 +62,8 @@ val LocalIconLoader = staticCompositionLocalOf<IconLoader> { error("No IconLoade
 
 /** Whether app icons render in grayscale (Latch settings → Appearance). */
 val LocalGrayIcons = compositionLocalOf { false }
+
+val LocalTileBackground = compositionLocalOf { TileBackground.DEFAULT }
 
 private val GrayscaleFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
@@ -137,8 +142,9 @@ fun AppTile(
     Box(modifier) {
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(if (highlighted) LatchColors.TileHover else LatchColors.Tile)
+                .background(tileBackgroundColor(LocalTileBackground.current, highlighted))
                 .onGloballyPositioned { coords = it }
                 .tapLongPressDrag(entry.key, handler)
                 .alpha(if (dimmed) 0.35f else 1f)
@@ -157,24 +163,44 @@ fun AppTile(
                 .testTag("$tagPrefix:${entry.label}"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
-        ) {
-            AppIcon(entry.key, Modifier.size(42.dp))
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = entry.label,
-                style = LatchType.TileLabel,
-                maxLines = 2,
-                minLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-        }
+        ) { TileContent(entry) }
         ContextMenu(
             expanded = menuOpen,
             onDismiss = { menuOpen = false },
             actions = actions.menu(entry, context)
         )
     }
+}
+
+private fun tileBackgroundColor(background: TileBackground, highlighted: Boolean): Color =
+    Color.White.copy(alpha = background.alpha + if (highlighted) TILE_HIGHLIGHT_ALPHA else 0f)
+
+private const val TILE_HIGHLIGHT_ALPHA = 0.10f
+
+@Composable
+fun TilePreview(entry: AppEntry, background: TileBackground, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(tileBackgroundColor(background, highlighted = false))
+            .padding(horizontal = 4.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) { TileContent(entry) }
+}
+
+@Composable
+private fun TileContent(entry: AppEntry) {
+    AppIcon(entry.key, Modifier.size(42.dp))
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = entry.label,
+        style = LatchType.TileLabel,
+        maxLines = 2,
+        minLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
