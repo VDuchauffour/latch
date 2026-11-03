@@ -172,6 +172,10 @@ class LatchViewModel(
         viewModelScope.launch { settingsStore.setAppsPerDrawer(count) }
     }
 
+    fun setGrayIcons(enabled: Boolean) {
+        viewModelScope.launch { settingsStore.setGrayIcons(enabled) }
+    }
+
     // --- Apps ---
 
     fun launch(key: AppKey, bounds: Rect?, options: Bundle?) = launcher.launch(key, bounds, options)

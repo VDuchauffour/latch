@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -200,6 +201,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val settingsActions = remember(vm) {
         object : SettingsActions {
             override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
+            override fun setGrayIcons(enabled: Boolean) = vm.setGrayIcons(enabled)
             override fun close() = vm.setSettingsOpen(false)
         }
     }
@@ -223,125 +225,127 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         }
     }
 
-    BoxWithConstraints(Modifier.fillMaxSize().testTag("root")) {
-        val heightPx = constraints.maxHeight.toFloat()
-        LaunchedEffect(heightPx) {
-            sheet.updateAnchors(
-                DraggableAnchors {
-                    DrawerValue.Closed at heightPx
-                    DrawerValue.Open at 0f
-                }
-            )
-        }
-        /** 0 = drawer closed, 1 = fully open. */
-        fun progress(): Float {
-            val offset = sheet.offset
-            if (offset.isNaN() || heightPx <= 0f) return if (sheet.currentValue == DrawerValue.Open) 1f else 0f
-            return (1f - offset / heightPx).coerceIn(0f, 1f)
-        }
-
-        val pullDownThreshold = with(density) { 40.dp.toPx() }
-        val homeScroll = remember(sheet, pullDownThreshold) {
-            homeNestedScroll(sheet, pullDownThreshold) {
-                if (!dragState.isDragging) vm.expandNotifications()
+    CompositionLocalProvider(LocalGrayIcons provides state.settings.grayIcons) {
+        BoxWithConstraints(Modifier.fillMaxSize().testTag("root")) {
+            val heightPx = constraints.maxHeight.toFloat()
+            LaunchedEffect(heightPx) {
+                sheet.updateAnchors(
+                    DraggableAnchors {
+                        DrawerValue.Closed at heightPx
+                        DrawerValue.Open at 0f
+                    }
+                )
             }
-        }
-        val drawerScroll = remember(sheet) { drawerNestedScroll(sheet) }
-        // Home's drawers and search bar fade out while Latch settings is open.
-        val homeAlpha by animateFloatAsState(
-            targetValue = if (state.settingsOpen) 0f else 1f,
-            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-            label = "homeAlpha"
-        )
+            /** 0 = drawer closed, 1 = fully open. */
+            fun progress(): Float {
+                val offset = sheet.offset
+                if (offset.isNaN() || heightPx <= 0f) return if (sheet.currentValue == DrawerValue.Open) 1f else 0f
+                return (1f - offset / heightPx).coerceIn(0f, 1f)
+            }
 
-        // Readability scrim over bright wallpapers.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.10f), Color.Black.copy(alpha = 0.35f))))
-        )
-
-        // Home layer: swipe up anywhere to open the drawer.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
-                .nestedScroll(homeScroll)
-                .graphicsLayer {
-                    val p = progress()
-                    alpha = (1f - p) * homeAlpha
-                    translationY = -p * 80.dp.toPx()
+            val pullDownThreshold = with(density) { 40.dp.toPx() }
+            val homeScroll = remember(sheet, pullDownThreshold) {
+                homeNestedScroll(sheet, pullDownThreshold) {
+                    if (!dragState.isDragging) vm.expandNotifications()
                 }
-        ) {
+            }
+            val drawerScroll = remember(sheet) { drawerNestedScroll(sheet) }
+            // Home's drawers and search bar fade out while Latch settings is open.
+            val homeAlpha by animateFloatAsState(
+                targetValue = if (state.settingsOpen) 0f else 1f,
+                animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                label = "homeAlpha"
+            )
+
+            // Readability scrim over bright wallpapers.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.10f), Color.Black.copy(alpha = 0.35f))))
+            )
+
+            // Home layer: swipe up anywhere to open the drawer.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
+                    .nestedScroll(homeScroll)
+                    .graphicsLayer {
+                        val p = progress()
+                        alpha = (1f - p) * homeAlpha
+                        translationY = -p * 80.dp.toPx()
+                    }
+            ) {
+                AnimatedVisibility(
+                    visible = !(searchFocused || searching) || dragState.isDragging,
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+                    exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
+                ) {
+                    HomeScreen(
+                        categories = state.categories,
+                        expandedCategoryId = state.expandedCategoryId,
+                        dragState = dragState,
+                        tileActions = tileActions,
+                        homeActions = homeActions,
+                        appsPerDrawer = state.settings.appsPerDrawer,
+                        modifier = Modifier.padding(bottom = 72.dp)
+                    )
+                }
+                HomeSearch(
+                    query = state.query,
+                    results = state.searchResults,
+                    onQueryChange = vm::setQuery,
+                    onSubmit = {
+                        state.searchResults.firstOrNull()?.let { tileActions.launch(it, null, null) }
+                    },
+                    onFocusChange = { focused ->
+                        searchFocused = focused
+                        if (focused) vm.collapseAll()
+                    },
+                    onDismiss = ::endSearch,
+                    quickMenu = quickGesture,
+                    tileActions = tileActions,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .imePadding()
+                        .padding(bottom = 12.dp)
+                )
+            }
+
+            // Drawer layer.
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .offset {
+                        val offset = sheet.offset.takeUnless { it.isNaN() }
+                            ?: if (state.drawerOpen) 0f else heightPx
+                        IntOffset(0, offset.roundToInt())
+                    }
+                    .graphicsLayer { alpha = (progress() * 1.4f).coerceAtMost(1f) }
+                    .background(LatchColors.OverlayScrim)
+                    .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
+                    .nestedScroll(drawerScroll)
+            ) {
+                AppDrawer(
+                    sections = state.drawerSections,
+                    actions = tileActions,
+                    listState = drawerList
+                )
+            }
+
+            QuickMenu(quickMenu, quickActions)
+
             AnimatedVisibility(
-                visible = !(searchFocused || searching) || dragState.isDragging,
+                visible = state.settingsOpen,
                 enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
                 exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
             ) {
-                HomeScreen(
-                    categories = state.categories,
-                    expandedCategoryId = state.expandedCategoryId,
-                    dragState = dragState,
-                    tileActions = tileActions,
-                    homeActions = homeActions,
-                    appsPerDrawer = state.settings.appsPerDrawer,
-                    modifier = Modifier.padding(bottom = 72.dp)
-                )
+                SettingsScreen(state.settings, settingsActions)
             }
-            HomeSearch(
-                query = state.query,
-                results = state.searchResults,
-                onQueryChange = vm::setQuery,
-                onSubmit = {
-                    state.searchResults.firstOrNull()?.let { tileActions.launch(it, null, null) }
-                },
-                onFocusChange = { focused ->
-                    searchFocused = focused
-                    if (focused) vm.collapseAll()
-                },
-                onDismiss = ::endSearch,
-                quickMenu = quickGesture,
-                tileActions = tileActions,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .padding(bottom = 12.dp)
-            )
+
+            DragShadow(dragState)
         }
-
-        // Drawer layer.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .offset {
-                    val offset = sheet.offset.takeUnless { it.isNaN() }
-                        ?: if (state.drawerOpen) 0f else heightPx
-                    IntOffset(0, offset.roundToInt())
-                }
-                .graphicsLayer { alpha = (progress() * 1.4f).coerceAtMost(1f) }
-                .background(LatchColors.OverlayScrim)
-                .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
-                .nestedScroll(drawerScroll)
-        ) {
-            AppDrawer(
-                sections = state.drawerSections,
-                actions = tileActions,
-                listState = drawerList
-            )
-        }
-
-        QuickMenu(quickMenu, quickActions)
-
-        AnimatedVisibility(
-            visible = state.settingsOpen,
-            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
-            exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
-        ) {
-            SettingsScreen(state.settings, settingsActions)
-        }
-
-        DragShadow(dragState)
     }
 
     when (val d = dialog) {

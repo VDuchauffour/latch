@@ -122,6 +122,7 @@ class LatchUiTest {
         rule.onNodeWithTag("settings").assertIsDisplayed()
         rule.onNodeWithTag("settingsSection:Appearance").performClick()
         rule.onNodeWithText("Apps per drawer").assertIsDisplayed()
+        rule.onNodeWithText("Gray icons").assertIsDisplayed()
         val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
             .config[SemanticsProperties.Text].first().text.toInt()
         val button = if (before < 7) "appsPerDrawer:plus" else "appsPerDrawer:minus"
