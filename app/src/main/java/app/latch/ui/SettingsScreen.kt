@@ -123,7 +123,7 @@ fun SettingsScreen(settings: LatchSettings, sampleApp: AppEntry?, actions: Setti
                 tag = "grayIcons"
             )
             Choice(
-                label = "App background",
+                label = "Tile background",
                 icon = R.drawable.ic_setting_tile_background,
                 value = settings.tileBackground.label,
                 onClick = { tileBackgroundPicker = true },
@@ -303,7 +303,7 @@ private fun TileBackgroundDialog(
     val shade = shades[index]
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("App background") },
+        title = { Text("Tile background") },
         text = {
             Column(Modifier.fillMaxWidth().testTag("tileBackgroundDialog"), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(

@@ -31,7 +31,7 @@
 - A full-screen page over a lightly dimmed wallpaper with a centered "Latch settings" title; home's drawers and search bar fade out while it is open; Back, Home, or a tap on empty space closes it.
 - Settings are grouped in sections that open and close like drawers on home (tap the name; one at a time).
 - Appearance: Apps per drawer (3–7, default 5) sets how many app tiles fit across an open drawer; extra apps wrap onto new lines.
-- Appearance: App background (None, Faint, Subtle, Medium, Light gray; default Subtle) sets how visible the box behind each app tile is. Tapping it opens a window with a slider from None (left) to Light gray (right), starting on the current shade (Subtle sits in the middle), and a sample tile (the default phone app, or any app if there is none) that follows it; Apply saves it.
+- Appearance: Tile background (None, Faint, Subtle, Medium, Light gray; default Subtle) sets how visible the box behind each app tile is. Tapping it opens a window with a slider from None (left) to Light gray (right), starting on the current shade (Subtle sits in the middle), and a sample tile (the default phone app, or any app if there is none) that follows it; Apply saves it.
 - Settings are saved to DataStore.
 
 ## App drawer
