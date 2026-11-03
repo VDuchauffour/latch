@@ -60,7 +60,7 @@ data class QuickAction(val label: String, val icon: QuickIcon, val onClick: () -
 
 /**
  * The quick menu opened by long-pressing the search icon. While the finger is still down, sliding
- * over a button highlights it and releasing runs it; otherwise the menu stays open for taps.
+ * over a button highlights it; releasing runs it and always closes the menu.
  */
 @Stable
 class QuickMenuState {
@@ -97,11 +97,10 @@ class QuickMenuState {
         return changed
     }
 
-    /** Finger lifted: returns the button to run (the menu then closes), or -1 to leave it open. */
+    /** Finger lifted: closes the menu and returns the button to run, or -1 for none. */
     fun release(): Int {
         val index = highlighted
-        highlighted = -1
-        if (index >= 0) close()
+        close()
         return index
     }
 }
