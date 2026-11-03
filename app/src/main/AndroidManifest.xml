@@ -10,6 +10,8 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+
     <application
         android:name=".LatchApp"
         android:allowBackup="false"

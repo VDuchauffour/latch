@@ -1,5 +1,6 @@
 package app.latch.data
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.Rect
@@ -27,6 +28,14 @@ class AppLauncher(
         runCatching {
             launcherApps.startAppDetailsActivity(repository.componentOf(key), user, sourceBounds, null)
         }.onFailure { fail(key, it) }
+    }
+
+    @SuppressLint("WrongConstant", "PrivateApi")
+    fun expandNotifications() {
+        runCatching {
+            val service = context.getSystemService("statusbar") ?: return
+            Class.forName("android.app.StatusBarManager").getMethod("expandNotificationsPanel").invoke(service)
+        }.onFailure { Log.w("AppLauncher", "Cannot expand notifications", it) }
     }
 
     private fun fail(key: AppKey, t: Throwable? = null) {

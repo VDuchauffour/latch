@@ -206,7 +206,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             return (1f - offset / heightPx).coerceIn(0f, 1f)
         }
 
-        val homeScroll = remember(sheet) { homeNestedScroll(sheet) }
+        val pullDownThreshold = with(density) { 40.dp.toPx() }
+        val homeScroll = remember(sheet, pullDownThreshold) {
+            homeNestedScroll(sheet, pullDownThreshold) {
+                if (!dragState.isDragging) vm.expandNotifications()
+            }
+        }
         val drawerScroll = remember(sheet) { drawerNestedScroll(sheet) }
 
         // Readability scrim over bright wallpapers.
@@ -383,7 +388,14 @@ private fun NameDialog(
  * category list opens the drawer.
  */
 @OptIn(ExperimentalFoundationApi::class)
-private fun homeNestedScroll(sheet: AnchoredDraggableState<DrawerValue>) = object : NestedScrollConnection {
+private fun homeNestedScroll(
+    sheet: AnchoredDraggableState<DrawerValue>,
+    pullDownThreshold: Float,
+    onPullDown: () -> Unit,
+) = object : NestedScrollConnection {
+    private var pulled = 0f
+    private var fired = false
+
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         // While the sheet is moving, keep feeding it instead of scrolling Home.
         if (source == NestedScrollSource.UserInput && sheet.currentValue == DrawerValue.Closed && isMoving(sheet)) {
@@ -392,10 +404,25 @@ private fun homeNestedScroll(sheet: AnchoredDraggableState<DrawerValue>) = objec
         return Offset.Zero
     }
 
-    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
-        if (source == NestedScrollSource.UserInput) Offset(0f, sheet.dispatchRawDelta(available.y)) else Offset.Zero
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        if (source != NestedScrollSource.UserInput) return Offset.Zero
+        val used = sheet.dispatchRawDelta(available.y)
+        val leftover = available.y - used
+        if (leftover > 0f && sheet.currentValue == DrawerValue.Closed && !isMoving(sheet)) {
+            pulled += leftover
+            if (!fired && pulled >= pullDownThreshold) {
+                fired = true
+                onPullDown()
+            }
+        } else if (available.y < 0f) {
+            pulled = 0f
+        }
+        return Offset(0f, used)
+    }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
+        pulled = 0f
+        fired = false
         if (isMoving(sheet)) {
             sheet.settle(available.y)
             return available

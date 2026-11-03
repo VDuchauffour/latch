@@ -151,6 +151,8 @@ class LatchViewModel(
 
     fun openAppInfo(key: AppKey, bounds: Rect?) = launcher.openAppInfo(key, bounds)
 
+    fun expandNotifications() = launcher.expandNotifications()
+
     // --- Categories ---
 
     fun createCategory(name: String) = edit { CategoryOps.create(it, newId(), name) }

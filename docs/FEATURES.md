@@ -7,6 +7,7 @@
 - An empty category shows a hint to drag apps into it.
 - "+ Add category" entry at the bottom of the list.
 - Pressing Home while already on home collapses everything and closes the drawer.
+- Swipe down on home (with the category list at its top) to pull down the notification shade.
 - Back never leaves the launcher: it closes the drawer, ends the search, or collapses the open category.
 
 ## Search
