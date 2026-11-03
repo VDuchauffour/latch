@@ -10,8 +10,9 @@ import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,9 +35,17 @@ class CategoryStoreTest {
         file = File(dir, "test-${System.nanoTime()}.preferences_pb")
     }
 
-    @After fun tearDown() {
-        scopes.forEach { it.cancel() }
+    // DataStore releases its file only once the scope's job has *completed*; a bare cancel()
+    // returns before that, so a new DataStore on the same file would race the old one.
+    private suspend fun closeStores() {
+        scopes.forEach { it.coroutineContext.job.cancelAndJoin() }
+        scopes.clear()
+    }
+
+    @After fun tearDown() = runBlocking {
+        closeStores()
         file.delete()
+        Unit
     }
 
     @Test fun seedsOnceAndPersistsAcrossInstances() = runBlocking {
@@ -50,8 +59,7 @@ class CategoryStoreTest {
         store.update { CategoryOps.rename(it, seeded[1].id, "Music") }
 
         // A fresh DataStore on the same file (as after a process restart) reads the same data.
-        scopes.forEach { it.cancel() }
-        scopes.clear()
+        closeStores()
         val reopened = newStore()
         reopened.seedIfEmpty() // must not overwrite
         val restored = reopened.categories.first()
