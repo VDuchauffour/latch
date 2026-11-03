@@ -1,5 +1,19 @@
-// Release version comes from the git tag in CI (`-PversionName=1.2.3`); local builds keep the default.
-val appVersionName: String = providers.gradleProperty("versionName").getOrElse("0.1.0")
+// Latest release tag (v1.2.3 -> 1.2.3), so local builds match the last release; 0.1.0 when there is no tag or no git.
+val latestTagVersion: String =
+    runCatching {
+        providers
+            .exec {
+                commandLine("git", "describe", "--tags", "--abbrev=0", "--match", "v[0-9]*")
+                isIgnoreExitValue = true
+            }.standardOutput.asText
+            .get()
+            .trim()
+            .removePrefix("v")
+    }.getOrNull()
+        ?.takeIf { it.isNotEmpty() } ?: "0.1.0"
+
+// CI passes the tag being released (`-PversionName=1.2.3`); local builds use the latest tag.
+val appVersionName: String = providers.gradleProperty("versionName").getOrElse(latestTagVersion)
 
 // Monotonic versionCode derived from the semver: 1.2.3 -> 10203 (minor/patch must stay below 100).
 val appVersionCode: Int =
