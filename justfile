@@ -51,9 +51,21 @@ test:
 test-device:
     ./gradlew connectedDebugAndroidTest
 
-# Lint
+# Android Lint
 lint:
     ./gradlew lintDebug
+
+# Format Kotlin sources (Spotless + ktlint)
+fmt:
+    ./gradlew spotlessApply
+
+# Check formatting without modifying files
+fmt-check:
+    ./gradlew spotlessCheck
+
+# Run the same checks as CI: formatting, lint, unit tests
+ci:
+    ./gradlew spotlessCheck lintDebug testDebugUnitTest
 
 # Remove build artifacts
 clean:

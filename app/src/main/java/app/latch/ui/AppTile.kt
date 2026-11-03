@@ -1,5 +1,6 @@
 package app.latch.ui
 
+import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.os.Bundle
 import android.view.View
@@ -71,6 +72,9 @@ interface TileActions {
 fun rememberAppIcon(key: AppKey): ImageBitmap? {
     val loader = LocalIconLoader.current
     val version by loader.version.collectAsState()
+
+    // False positive: `value` is assigned, but the check misses it with `by` delegation.
+    @SuppressLint("ProduceStateDoesNotAssignValue")
     val icon by produceState(loader.cached(key), key, version) { value = loader.load(key) }
     return icon
 }
@@ -84,7 +88,7 @@ fun AppTile(
     modifier: Modifier = Modifier,
     dimmed: Boolean = false,
     highlighted: Boolean = false,
-    tagPrefix: String = "tile",
+    tagPrefix: String = "tile"
 ) {
     val view = LocalView.current
     val haptics = LocalHapticFeedback.current
@@ -133,12 +137,18 @@ fun AppTile(
                 .padding(horizontal = 4.dp, vertical = 12.dp)
                 .semantics {
                     contentDescription = entry.label
-                    onClick { handler.onTap(); true }
-                    onLongClick { handler.onLongPress(); true }
+                    onClick {
+                        handler.onTap()
+                        true
+                    }
+                    onLongClick {
+                        handler.onLongPress()
+                        true
+                    }
                 }
                 .testTag("$tagPrefix:${entry.label}"),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Top
         ) {
             AppIcon(entry.key, Modifier.size(42.dp))
             Spacer(Modifier.height(8.dp))
@@ -148,13 +158,13 @@ fun AppTile(
                 maxLines = 2,
                 minLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
         }
         ContextMenu(
             expanded = menuOpen,
             onDismiss = { menuOpen = false },
-            actions = actions.menu(entry, context),
+            actions = actions.menu(entry, context)
         )
     }
 }
@@ -178,7 +188,7 @@ private fun launchOptions(view: View, bounds: android.graphics.Rect): Bundle? {
             bounds.left - location[0],
             bounds.top - location[1],
             bounds.width(),
-            bounds.height(),
+            bounds.height()
         ).toBundle()
     }.getOrNull()
 }
