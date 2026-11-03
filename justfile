@@ -31,9 +31,30 @@ _setup-skills:
 debug:
     ./gradlew assembleDebug
 
-# Build release APK (R8 + resource shrinking, debug-key signed)
+# Build release APK (R8 + resource shrinking; debug-key signed unless LATCH_KEYSTORE_* env vars are set)
 release:
     ./gradlew assembleRelease
+
+# One-time: create the release signing key (kept outside the repo) and store it as GitHub secrets for the Release APK workflow
+release-keystore KEYSTORE="~/.android/latch-release.jks":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    keystore="{{ KEYSTORE }}"
+    keystore="${keystore/#\~/$HOME}"
+    if [ -e "$keystore" ]; then
+        echo "$keystore already exists; reusing it (back it up: losing it breaks updates for every install)"
+    else
+        read -rsp "Keystore password (min 6 chars): " pass; echo
+        mkdir -p "$(dirname "$keystore")"
+        mise x java -- keytool -genkeypair -keystore "$keystore" -alias latch -keyalg RSA -keysize 4096 \
+            -validity 10000 -storepass "$pass" -keypass "$pass" -dname "CN=Latch"
+        echo "Created $keystore; back it up, losing it breaks updates for every install"
+    fi
+    [ -n "${pass:-}" ] || { read -rsp "Keystore password: " pass; echo; }
+    base64 -w0 "$keystore" | gh secret set LATCH_KEYSTORE_BASE64
+    printf %s "$pass" | gh secret set LATCH_KEYSTORE_PASSWORD
+    printf %s "$pass" | gh secret set LATCH_KEY_PASSWORD
+    printf latch | gh secret set LATCH_KEY_ALIAS
 
 # Install debug build on connected device/emulator
 install:
