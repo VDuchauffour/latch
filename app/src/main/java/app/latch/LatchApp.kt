@@ -5,6 +5,7 @@ import app.latch.data.AppLauncher
 import app.latch.data.AppRepository
 import app.latch.data.CategoryStore
 import app.latch.data.IconLoader
+import app.latch.data.SettingsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
@@ -18,6 +19,8 @@ class LatchApp : Application() {
         private set
     lateinit var categories: CategoryStore
         private set
+    lateinit var settings: SettingsStore
+        private set
     lateinit var icons: IconLoader
         private set
     lateinit var launcher: AppLauncher
@@ -27,6 +30,7 @@ class LatchApp : Application() {
         super.onCreate()
         apps = AppRepository(this, appScope)
         categories = CategoryStore(this)
+        settings = SettingsStore(this)
         icons = IconLoader(this, apps)
         launcher = AppLauncher(this, apps)
         apps.iconInvalidations.onEach(icons::invalidate).launchIn(appScope)

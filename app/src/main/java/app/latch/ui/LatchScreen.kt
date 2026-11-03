@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -176,7 +177,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val quickActions = remember(vm) {
         listOf(
             QuickAction("Add drawer", QuickIcon.AddDrawer) { dialog = HomeDialog.Add },
-            QuickAction("Android settings", QuickIcon.Settings, vm::openSystemSettings)
+            QuickAction("Latch settings", QuickIcon.Settings) { vm.setSettingsOpen(true) }
         )
     }
     val quickGesture = remember(vm, quickMenu, quickActions) {
@@ -195,6 +196,13 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     }
     LaunchedEffect(drawerVisible) { if (drawerVisible) quickMenu.close() }
     BackHandler(enabled = quickMenu.isOpen) { quickMenu.close() }
+    BackHandler(enabled = state.settingsOpen) { vm.setSettingsOpen(false) }
+    val settingsActions = remember(vm) {
+        object : SettingsActions {
+            override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
+            override fun close() = vm.setSettingsOpen(false)
+        }
+    }
     val homeActions = remember(vm) {
         object : HomeActions {
             override fun toggle(categoryId: String) {
@@ -239,6 +247,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             }
         }
         val drawerScroll = remember(sheet) { drawerNestedScroll(sheet) }
+        // Home's drawers and search bar fade out while Latch settings is open.
+        val homeAlpha by animateFloatAsState(
+            targetValue = if (state.settingsOpen) 0f else 1f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+            label = "homeAlpha"
+        )
 
         // Readability scrim over bright wallpapers.
         Box(
@@ -255,7 +269,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 .nestedScroll(homeScroll)
                 .graphicsLayer {
                     val p = progress()
-                    alpha = 1f - p
+                    alpha = (1f - p) * homeAlpha
                     translationY = -p * 80.dp.toPx()
                 }
         ) {
@@ -270,6 +284,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     dragState = dragState,
                     tileActions = tileActions,
                     homeActions = homeActions,
+                    appsPerDrawer = state.settings.appsPerDrawer,
                     modifier = Modifier.padding(bottom = 72.dp)
                 )
             }
@@ -317,6 +332,14 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         }
 
         QuickMenu(quickMenu, quickActions)
+
+        AnimatedVisibility(
+            visible = state.settingsOpen,
+            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+            exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
+        ) {
+            SettingsScreen(state.settings, settingsActions)
+        }
 
         DragShadow(dragState)
     }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
-private val Context.latchDataStore: DataStore<Preferences> by preferencesDataStore(name = "latch")
+internal val Context.latchDataStore: DataStore<Preferences> by preferencesDataStore(name = "latch")
 
 /** Persists categories as a single JSON string in DataStore (see [CategoryCodec]). */
 class CategoryStore(private val dataStore: DataStore<Preferences>) {
