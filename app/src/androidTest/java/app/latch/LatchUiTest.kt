@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -20,7 +21,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.latch.data.TileBackground
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -128,8 +128,8 @@ class LatchUiTest {
             .config[SemanticsProperties.Text].first().text
         rule.onNodeWithTag("tileBackground").performClick()
         rule.onNodeWithTag("tileBackgroundDialog").assertIsDisplayed()
-        rule.onNodeWithText(shade, useUnmergedTree = true).assertExists()
-        rule.onNodeWithTag("tileBackground:${TileBackground.entries.first { it.label == shade }.name}").performClick()
+        rule.onNodeWithTag("tileBackgroundDialog:label").assertTextEquals(shade)
+        rule.onNodeWithTag("tileBackgroundDialog:apply").performClick()
         rule.waitUntil(3_000) { rule.onAllNodesWithTag("tileBackgroundDialog").fetchSemanticsNodes().isEmpty() }
         val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
             .config[SemanticsProperties.Text].first().text.toInt()

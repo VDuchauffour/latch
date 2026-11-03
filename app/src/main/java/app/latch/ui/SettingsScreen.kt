@@ -22,21 +22,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -63,6 +62,7 @@ import app.latch.data.TileBackground
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 import app.latch.ui.theme.TextShadow
+import kotlin.math.roundToInt
 
 /** Callbacks from the settings screen to the root. */
 interface SettingsActions {
@@ -291,34 +291,36 @@ private fun Choice(label: String, @DrawableRes icon: Int, value: String, onClick
 
 @Composable
 private fun TileBackgroundDialog(selected: TileBackground, onSelect: (TileBackground) -> Unit, onDismiss: () -> Unit) {
+    val shades = TileBackground.entries
+    var index by rememberSaveable { mutableIntStateOf(selected.ordinal) }
+    val shade = shades[index]
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("App background") },
         text = {
-            Column(Modifier.selectableGroup().testTag("tileBackgroundDialog")) {
-                TileBackground.entries.forEach { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(selected = option == selected, role = Role.RadioButton, onClick = { onSelect(option) })
-                            .padding(vertical = 8.dp)
-                            .testTag("tileBackground:${option.name}"),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = option == selected, onClick = null)
-                        Text(option.label, modifier = Modifier.weight(1f).padding(start = 12.dp))
-                        Box(
-                            Modifier
-                                .size(width = 40.dp, height = 28.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color.Black.copy(alpha = 0.6f))
-                                .background(Color.White.copy(alpha = option.alpha))
-                        )
-                    }
+            Column(Modifier.fillMaxWidth().testTag("tileBackgroundDialog"), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier
+                        .size(width = 72.dp, height = 56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .background(Color.White.copy(alpha = shade.alpha))
+                )
+                Text(shade.label, modifier = Modifier.padding(top = 12.dp).testTag("tileBackgroundDialog:label"))
+                Slider(
+                    value = index.toFloat(),
+                    onValueChange = { index = it.roundToInt() },
+                    valueRange = 0f..shades.lastIndex.toFloat(),
+                    steps = shades.size - 2,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("tileBackgroundDialog:slider")
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(shades.first().label)
+                    Text(shades.last().label)
                 }
             }
         },
-        confirmButton = {},
+        confirmButton = { TextButton(onClick = { onSelect(shade) }, Modifier.testTag("tileBackgroundDialog:apply")) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
