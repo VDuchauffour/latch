@@ -21,8 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +53,7 @@ import app.latch.ui.theme.TextShadow
 /** Callbacks from the settings screen to the root. */
 interface SettingsActions {
     fun setAppsPerDrawer(count: Int)
+    fun setGrayIcons(enabled: Boolean)
 
     /** Close the settings screen, e.g. after a tap on empty space. */
     fun close()
@@ -90,6 +95,12 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
                 range = LatchSettings.APPS_PER_DRAWER_RANGE,
                 onChange = actions::setAppsPerDrawer,
                 tag = "appsPerDrawer"
+            )
+            Toggle(
+                label = "Gray icons",
+                checked = settings.grayIcons,
+                onChange = actions::setGrayIcons,
+                tag = "grayIcons"
             )
         }
     }
@@ -164,5 +175,32 @@ private fun StepButton(symbol: String, enabled: Boolean, tag: String, onClick: (
         contentAlignment = Alignment.Center
     ) {
         Text(symbol, style = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold))
+    }
+}
+
+/** A labelled on/off switch. */
+@Composable
+private fun Toggle(label: String, checked: Boolean, onChange: (Boolean) -> Unit, tag: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .padding(vertical = 4.dp)
+            .testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = SettingLabel)
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.Black,
+                checkedTrackColor = Color.White,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color.White.copy(alpha = 0.2f),
+                uncheckedBorderColor = Color.White
+            )
+        )
     }
 }

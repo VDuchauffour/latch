@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -31,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -53,6 +56,11 @@ import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 
 val LocalIconLoader = staticCompositionLocalOf<IconLoader> { error("No IconLoader provided") }
+
+/** Whether app icons render in grayscale (Latch settings → Appearance). */
+val LocalGrayIcons = compositionLocalOf { false }
+
+private val GrayscaleFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
 /** Where a tile lives, which decides its menu and its drag semantics. */
 @Immutable
@@ -173,7 +181,12 @@ fun AppTile(
 fun AppIcon(key: AppKey, modifier: Modifier = Modifier) {
     val icon = rememberAppIcon(key)
     if (icon != null) {
-        Image(bitmap = icon, contentDescription = null, modifier = modifier)
+        Image(
+            bitmap = icon,
+            contentDescription = null,
+            modifier = modifier,
+            colorFilter = if (LocalGrayIcons.current) GrayscaleFilter else null
+        )
     } else {
         Box(modifier.clip(CircleShape).background(LatchColors.Placeholder))
     }
