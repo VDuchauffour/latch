@@ -64,6 +64,7 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(LatchColors.SettingsScrim)
             // Taps on empty space close settings instead of reaching home underneath.
             .pointerInput(actions) { detectTapGestures { actions.close() } }
             .systemBarsPadding()
