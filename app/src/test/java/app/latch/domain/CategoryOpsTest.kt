@@ -5,22 +5,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CategoryOpsTest {
-    private val signal = AppKey("org.thoughtcrime.securesms", "RoutingActivity", 0)
-    private val spotify = AppKey("com.spotify.music", "MainActivity", 0)
-    private val workSignal = signal.copy(userSerial = 10)
+    private val chat = AppKey("com.example.chat", "MainActivity", 0)
+    private val music = AppKey("com.example.music", "MainActivity", 0)
+    private val workChat = chat.copy(userSerial = 10)
 
     private fun cats() = listOf(
-        Category("t", "Talk", 0, listOf(signal)),
+        Category("t", "Talk", 0, listOf(chat)),
         Category("l", "Listen", 1, emptyList()),
     )
-
-    @Test fun `seed creates default categories in order`() {
-        var n = 0
-        val seeded = CategoryOps.seed { "id${n++}" }
-        assertEquals(CategoryOps.DEFAULT_NAMES, seeded.map { it.name })
-        assertEquals(listOf(0, 1, 2, 3), seeded.map { it.order })
-        assertTrue(seeded.all { it.apps.isEmpty() })
-    }
 
     @Test fun `create appends trimmed name and ignores blank`() {
         val created = CategoryOps.create(cats(), "s", "  See ")
@@ -31,35 +23,35 @@ class CategoryOpsTest {
     }
 
     @Test fun `add is idempotent`() {
-        val once = CategoryOps.addApp(cats(), "t", signal)
-        assertEquals(listOf(signal), once.first { it.id == "t" }.apps)
-        val other = CategoryOps.addApp(once, "t", spotify)
-        assertEquals(listOf(signal, spotify), other.first { it.id == "t" }.apps)
+        val once = CategoryOps.addApp(cats(), "t", chat)
+        assertEquals(listOf(chat), once.first { it.id == "t" }.apps)
+        val other = CategoryOps.addApp(once, "t", music)
+        assertEquals(listOf(chat, music), other.first { it.id == "t" }.apps)
     }
 
     @Test fun `same app may be in several categories`() {
-        val result = CategoryOps.addApp(cats(), "l", signal)
-        assertTrue(result.all { signal in it.apps })
+        val result = CategoryOps.addApp(cats(), "l", chat)
+        assertTrue(result.all { chat in it.apps })
     }
 
     @Test fun `work profile copy is a distinct app`() {
-        val result = CategoryOps.addApp(cats(), "t", workSignal)
-        assertEquals(listOf(signal, workSignal), result.first { it.id == "t" }.apps)
+        val result = CategoryOps.addApp(cats(), "t", workChat)
+        assertEquals(listOf(chat, workChat), result.first { it.id == "t" }.apps)
     }
 
     @Test fun `remove only affects the given category`() {
-        val both = CategoryOps.addApp(cats(), "l", signal)
-        val result = CategoryOps.removeApp(both, "t", signal)
+        val both = CategoryOps.addApp(cats(), "l", chat)
+        val result = CategoryOps.removeApp(both, "t", chat)
         assertEquals(emptyList<AppKey>(), result.first { it.id == "t" }.apps)
-        assertEquals(listOf(signal), result.first { it.id == "l" }.apps)
+        assertEquals(listOf(chat), result.first { it.id == "l" }.apps)
     }
 
     @Test fun `move removes from source and adds to target`() {
-        val result = CategoryOps.moveApp(cats(), "t", "l", signal)
+        val result = CategoryOps.moveApp(cats(), "t", "l", chat)
         assertEquals(emptyList<AppKey>(), result.first { it.id == "t" }.apps)
-        assertEquals(listOf(signal), result.first { it.id == "l" }.apps)
-        assertEquals(cats(), CategoryOps.moveApp(cats(), "t", "t", signal))
-        assertEquals(cats(), CategoryOps.moveApp(cats(), "t", "missing", signal))
+        assertEquals(listOf(chat), result.first { it.id == "l" }.apps)
+        assertEquals(cats(), CategoryOps.moveApp(cats(), "t", "t", chat))
+        assertEquals(cats(), CategoryOps.moveApp(cats(), "t", "missing", chat))
     }
 
     @Test fun `rename trims and ignores blank`() {
@@ -80,10 +72,10 @@ class CategoryOpsTest {
     }
 
     @Test fun `prune removes uninstalled apps everywhere`() {
-        val both = CategoryOps.addApp(CategoryOps.addApp(cats(), "l", signal), "l", spotify)
-        val result = CategoryOps.pruneTo(both, setOf(spotify))
-        assertTrue(result.none { signal in it.apps })
-        assertEquals(listOf(spotify), result.first { it.id == "l" }.apps)
+        val both = CategoryOps.addApp(CategoryOps.addApp(cats(), "l", chat), "l", music)
+        val result = CategoryOps.pruneTo(both, setOf(music))
+        assertTrue(result.none { chat in it.apps })
+        assertEquals(listOf(music), result.first { it.id == "l" }.apps)
     }
 
     @Test fun `normalize sorts by order and renumbers`() {
@@ -92,10 +84,10 @@ class CategoryOpsTest {
     }
 
     @Test fun `resolve drops missing apps and keeps order`() {
-        val withBoth = CategoryOps.addApp(cats(), "t", spotify)
-        val installed = mapOf(spotify to AppEntry(spotify, "Spotify"))
+        val withBoth = CategoryOps.addApp(cats(), "t", music)
+        val installed = mapOf(music to AppEntry(music, "Music"))
         val resolved = CategoryOps.resolve(withBoth, installed)
-        assertEquals(listOf("Spotify"), resolved.first().second.map { it.label })
-        assertEquals(listOf(signal, spotify), resolved.first().first.apps)
+        assertEquals(listOf("Music"), resolved.first().second.map { it.label })
+        assertEquals(listOf(chat, music), resolved.first().first.apps)
     }
 }

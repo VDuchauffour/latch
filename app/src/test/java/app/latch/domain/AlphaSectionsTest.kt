@@ -20,10 +20,10 @@ class AlphaSectionsTest {
     private fun List<Section>.flat() = map { s -> s.header to s.apps.map { it.label } }
 
     @Test fun `accented labels sort and group with their base letter`() {
-        val sections = build("Airbnb", "AlloCiné", "Éditeur", "Alan", "Email", "AFinity")
+        val sections = build("Agenda", "Alarmé", "Éditeur", "Album", "Email", "AFiles")
         assertEquals(
             listOf(
-                "A" to listOf("AFinity", "Airbnb", "Alan", "AlloCiné"),
+                "A" to listOf("AFiles", "Agenda", "Alarmé", "Album"),
                 "E" to listOf("Éditeur", "Email"),
             ),
             sections.flat(),
@@ -31,25 +31,25 @@ class AlphaSectionsTest {
     }
 
     @Test fun `digits and symbols go to the leading other bucket`() {
-        val sections = build("Bolt", "2FAS Auth", "@Home", "Alan", "9GAG")
+        val sections = build("Books", "2FA Auth", "@Home", "Album", "9 Puzzles")
         assertEquals(AlphaSections.OTHER, sections.first().header)
-        assertEquals(setOf("2FAS Auth", "@Home", "9GAG"), sections.first().apps.map { it.label }.toSet())
+        assertEquals(setOf("2FA Auth", "@Home", "9 Puzzles"), sections.first().apps.map { it.label }.toSet())
         assertEquals(listOf("#", "A", "B"), sections.map { it.header })
     }
 
     @Test fun `emoji start goes to other bucket`() {
-        val sections = build("😀 Smile", "Zoom")
-        assertEquals(listOf("#" to listOf("😀 Smile"), "Z" to listOf("Zoom")), sections.flat())
+        val sections = build("😀 Smile", "Zip")
+        assertEquals(listOf("#" to listOf("😀 Smile"), "Z" to listOf("Zip")), sections.flat())
     }
 
     @Test fun `mixed case is ignored for sorting and headers`() {
-        val sections = build("bandcamp", "Binance", "b.tv", "BOLT")
+        val sections = build("browser", "Banking", "b.tv", "BOOKS")
         assertEquals(listOf("B"), sections.map { it.header })
-        assertEquals(listOf("bandcamp", "Binance", "BOLT", "b.tv").sortedWith(collator()), sections[0].apps.map { it.label })
+        assertEquals(listOf("browser", "Banking", "BOOKS", "b.tv").sortedWith(collator()), sections[0].apps.map { it.label })
     }
 
     @Test fun `leading whitespace is ignored and empty labels are other`() {
-        assertEquals("A", AlphaSections.headerFor("  alan"))
+        assertEquals("A", AlphaSections.headerFor("  album"))
         assertEquals(AlphaSections.OTHER, AlphaSections.headerFor(""))
         assertEquals(AlphaSections.OTHER, AlphaSections.headerFor("   "))
     }
@@ -70,8 +70,8 @@ class AlphaSectionsTest {
     }
 
     @Test fun `ties are broken deterministically`() {
-        val a = build("alan", "Alan", "ALAN")
-        val b = AlphaSections.build(entries("alan", "Alan", "ALAN").reversed(), collator())
+        val a = build("album", "Album", "ALBUM")
+        val b = AlphaSections.build(entries("album", "Album", "ALBUM").reversed(), collator())
         assertEquals(a, b)
     }
 

@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import app.latch.domain.Category
-import app.latch.domain.CategoryOps
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -29,11 +28,11 @@ class CategoryStore(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    /** On first launch, stores a few empty default categories so Home isn't blank. */
+    /** On first launch, stores an empty category list so [categories] starts emitting. */
     suspend fun seedIfEmpty() {
         dataStore.edit { prefs ->
             if (prefs[KEY] == null) {
-                prefs[KEY] = CategoryCodec.encode(CategoryOps.seed { newId() })
+                prefs[KEY] = CategoryCodec.encode(emptyList())
             }
         }
     }

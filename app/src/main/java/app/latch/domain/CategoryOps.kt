@@ -6,11 +6,6 @@ package app.latch.domain
  */
 object CategoryOps {
 
-    val DEFAULT_NAMES = listOf("Talk", "Listen", "See", "Tech")
-
-    fun seed(newId: () -> String): List<Category> =
-        DEFAULT_NAMES.mapIndexed { i, name -> Category(newId(), name, i, emptyList()) }
-
     fun normalize(categories: List<Category>): List<Category> =
         categories.sortedBy { it.order }.mapIndexed { i, c -> if (c.order == i) c else c.copy(order = i) }
 

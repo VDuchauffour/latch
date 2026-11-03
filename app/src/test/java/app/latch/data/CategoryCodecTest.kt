@@ -9,8 +9,8 @@ import org.junit.Test
 
 class CategoryCodecTest {
     private val sample = listOf(
-        Category("1", "Talk", 0, listOf(AppKey("org.thoughtcrime.securesms", "org.thoughtcrime.securesms.RoutingActivity", 0))),
-        Category("2", "Listen", 1, listOf(AppKey("com.spotify.music", "com.spotify.music.MainActivity", 10))),
+        Category("1", "Talk", 0, listOf(AppKey("com.example.chat", "com.example.chat.MainActivity", 0))),
+        Category("2", "Listen", 1, listOf(AppKey("com.example.music", "com.example.music.MainActivity", 10))),
         Category("3", "Émojis 🎉 \"quoted\"", 2, emptyList()),
     )
 
@@ -21,7 +21,7 @@ class CategoryCodecTest {
     @Test fun `encoded document uses the documented keys`() {
         val text = CategoryCodec.encode(sample)
         assertTrue(text.contains("\"version\":1"))
-        assertTrue(text.contains("\"pkg\":\"com.spotify.music\""))
+        assertTrue(text.contains("\"pkg\":\"com.example.music\""))
         assertTrue(text.contains("\"cls\":"))
         assertTrue(text.contains("\"user\":10"))
     }
@@ -30,10 +30,10 @@ class CategoryCodecTest {
         val text = """
             { "version": 1, "categories": [
               { "id": "uuid", "name": "Talk", "order": 0,
-                "apps": [ { "pkg": "org.thoughtcrime.securesms", "cls": "RoutingActivity", "user": 0 } ] } ] }
+                "apps": [ { "pkg": "com.example.chat", "cls": "MainActivity", "user": 0 } ] } ] }
         """.trimIndent()
         val decoded = CategoryCodec.decode(text)!!
-        assertEquals(listOf(AppKey("org.thoughtcrime.securesms", "RoutingActivity", 0)), decoded.single().apps)
+        assertEquals(listOf(AppKey("com.example.chat", "MainActivity", 0)), decoded.single().apps)
     }
 
     @Test fun `migrates v0 bare array`() {

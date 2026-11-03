@@ -2,7 +2,7 @@
 
 ## Home
 - Text-first home screen over the system wallpaper, with transparent status and navigation bars.
-- A centered list of user-defined categories, seeded on first launch with Talk, Listen, See and Tech.
+- A centered list of user-defined categories; none exist on first launch.
 - Tap a category to expand it accordion-style into a horizontal row of app tiles; only one is open at a time.
 - An empty category shows a hint to drag apps into it.
 - "+ Add category" entry at the bottom of the list.

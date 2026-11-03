@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
@@ -30,16 +31,21 @@ class LatchUiTest {
         rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
     }
 
+    private val isCategory = SemanticsMatcher("category") { n ->
+        n.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("category:") == true
+    }
+
+    /** Home starts with no categories, so create one through the UI when needed. */
     private fun firstCategoryTag(): String {
-        rule.waitUntil(5_000) {
-            rule.onAllNodes(SemanticsMatcher("category") { node ->
-                node.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("category:") == true
-            }).fetchSemanticsNodes().isNotEmpty()
+        waitForTag("addCategory")
+        rule.waitForIdle()
+        if (rule.onAllNodes(isCategory).fetchSemanticsNodes().isEmpty()) {
+            rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
+            rule.onNode(hasTestTag("nameField")).performTextInput("Test")
+            rule.onNodeWithText("Add").performClick()
         }
-        val node = rule.onAllNodes(SemanticsMatcher("category") { n ->
-            n.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("category:") == true
-        }).fetchSemanticsNodes().first()
-        return node.config[SemanticsProperties.TestTag]
+        rule.waitUntil(5_000) { rule.onAllNodes(isCategory).fetchSemanticsNodes().isNotEmpty() }
+        return rule.onAllNodes(isCategory).fetchSemanticsNodes().first().config[SemanticsProperties.TestTag]
     }
 
     @Test fun categoryExpandsAndCollapses() {
@@ -85,7 +91,7 @@ class LatchUiTest {
     }
 
     @Test fun addCategoryEntryOpensDialog() {
-        firstCategoryTag()
+        waitForTag("addCategory")
         rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
         rule.onNodeWithText("New category").assertIsDisplayed()
         rule.onNode(hasTestTag("nameField")).assertIsDisplayed()

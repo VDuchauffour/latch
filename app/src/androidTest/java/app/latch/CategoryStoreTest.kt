@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.latch.data.CategoryStore
 import app.latch.domain.AppKey
+import app.latch.domain.Category
 import app.latch.domain.CategoryOps
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -51,8 +52,11 @@ class CategoryStoreTest {
     @Test fun seedsOnceAndPersistsAcrossInstances() = runBlocking {
         val store = newStore()
         store.seedIfEmpty()
+        assertEquals(emptyList<Category>(), store.categories.first())
+
+        store.update { CategoryOps.create(it, "a", "First") }
+        store.update { CategoryOps.create(it, "b", "Second") }
         val seeded = store.categories.first()
-        assertEquals(CategoryOps.DEFAULT_NAMES, seeded.map { it.name })
 
         val app = AppKey("com.example", "com.example.Main", 0)
         store.update { CategoryOps.addApp(it, seeded[0].id, app) }
