@@ -11,7 +11,7 @@ class CategoryOpsTest {
 
     private fun cats() = listOf(
         Category("t", "Talk", 0, listOf(chat)),
-        Category("l", "Listen", 1, emptyList()),
+        Category("l", "Listen", 1, emptyList())
     )
 
     @Test fun `create appends trimmed name and ignores blank`() {

@@ -75,7 +75,7 @@ fun HomeScreen(
     dragState: DragState,
     tileActions: TileActions,
     homeActions: HomeActions,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     // --- Category reordering (local order while dragging, committed on release) ---
     var reorderingId by remember { mutableStateOf<String?>(null) }
@@ -142,7 +142,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .testTag("home"),
+                .testTag("home")
         ) {
             Column(
                 modifier = Modifier
@@ -151,21 +151,21 @@ fun HomeScreen(
                     .padding(insets)
                     .padding(vertical = 24.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 shown.forEach { category ->
                     // Keyed so a reordered item keeps its state and its in-flight gesture.
                     key(category.id) {
-                    CategoryItem(
-                        category = category,
-                        expanded = category.id == expandedCategoryId,
-                        dragState = dragState,
-                        tileActions = tileActions,
-                        homeActions = homeActions,
-                        reorder = reorder,
-                        reordering = category.id == reorderingId,
-                        reorderOffsetY = reorderOffset,
-                    )
+                        CategoryItem(
+                            category = category,
+                            expanded = category.id == expandedCategoryId,
+                            dragState = dragState,
+                            tileActions = tileActions,
+                            homeActions = homeActions,
+                            reorder = reorder,
+                            reordering = category.id == reorderingId,
+                            reorderOffsetY = reorderOffset
+                        )
                     }
                 }
                 Text(
@@ -174,10 +174,15 @@ fun HomeScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 20.dp)
-                        .semantics { onClick { homeActions.requestAdd(); true } }
+                        .semantics {
+                            onClick {
+                                homeActions.requestAdd()
+                                true
+                            }
+                        }
                         .tapLongPressDrag(Unit, SimpleTap { homeActions.requestAdd() })
                         .padding(horizontal = 24.dp, vertical = 12.dp)
-                        .testTag("addCategory"),
+                        .testTag("addCategory")
                 )
             }
         }
@@ -210,7 +215,7 @@ private fun CategoryItem(
     homeActions: HomeActions,
     reorder: ReorderCallbacks,
     reordering: Boolean,
-    reorderOffsetY: (String) -> Float,
+    reorderOffsetY: (String) -> Float
 ) {
     val haptics = LocalHapticFeedback.current
     var menuOpen by remember { mutableStateOf(false) }
@@ -252,7 +257,7 @@ private fun CategoryItem(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Box(
@@ -265,12 +270,18 @@ private fun CategoryItem(
                     }
                     .tapLongPressDrag(category.id, handler)
                     .semantics {
-                        onClick { actions.toggle(current.id); true }
-                        onLongClick { menuOpen = true; true }
+                        onClick {
+                            actions.toggle(current.id)
+                            true
+                        }
+                        onLongClick {
+                            menuOpen = true
+                            true
+                        }
                     }
                     .testTag("category:${category.name}")
                     .padding(vertical = 6.dp),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = category.name,
@@ -289,7 +300,7 @@ private fun CategoryItem(
                                 dragState.isDragging && !hovered -> 0.75f
                                 else -> 1f
                             }
-                        },
+                        }
                 )
             }
             // Sibling of the gesture node (not a child), so dismissing the popup when a reorder
@@ -300,8 +311,8 @@ private fun CategoryItem(
                     onDismiss = { menuOpen = false },
                     actions = listOf(
                         MenuAction("Rename") { actions.requestRename(current) },
-                        MenuAction("Delete") { actions.requestDelete(current) },
-                    ),
+                        MenuAction("Delete") { actions.requestDelete(current) }
+                    )
                 )
             }
         }
@@ -309,7 +320,7 @@ private fun CategoryItem(
         AnimatedVisibility(
             visible = expanded,
             enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
-            exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut(),
+            exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut()
         ) {
             CategoryApps(category, tileActions)
         }
@@ -323,7 +334,7 @@ private fun CategoryApps(category: CategoryUi, tileActions: TileActions) {
             text = "Long-press an app in the drawer (swipe up)\nand drag it here",
             style = LatchType.Hint,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
         )
         return
     }
@@ -333,7 +344,7 @@ private fun CategoryApps(category: CategoryUi, tileActions: TileActions) {
         LazyRow(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("categoryApps:${category.name}"),
             contentPadding = PaddingValues(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
         ) {
             items(category.apps, key = { it.key.toString() }) { entry ->
                 AppTile(entry, context, tileActions, Modifier.width(tileWidth))

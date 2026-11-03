@@ -10,10 +10,7 @@ import android.widget.Toast
 import app.latch.domain.AppKey
 
 /** Starts apps and their system "App info" screen through [LauncherApps] (works for work profiles). */
-class AppLauncher(
-    private val context: Context,
-    private val repository: AppRepository,
-) {
+class AppLauncher(private val context: Context, private val repository: AppRepository) {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
 
     fun launch(key: AppKey, sourceBounds: Rect? = null, options: Bundle? = null) {

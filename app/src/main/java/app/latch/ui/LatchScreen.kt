@@ -6,9 +6,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -100,7 +100,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             positionalThreshold = { distance -> distance * 0.2f },
             velocityThreshold = { with(density) { 500.dp.toPx() } },
             snapAnimationSpec = spring(dampingRatio = 0.9f, stiffness = 500f),
-            decayAnimationSpec = exponentialDecay(),
+            decayAnimationSpec = exponentialDecay()
         )
     }
 
@@ -182,9 +182,15 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 focusManager.clearFocus()
                 vm.collapseAll()
             }
-            override fun requestAdd() { dialog = HomeDialog.Add }
-            override fun requestRename(category: CategoryUi) { dialog = HomeDialog.Rename(category.id, category.name) }
-            override fun requestDelete(category: CategoryUi) { dialog = HomeDialog.Delete(category.id, category.name) }
+            override fun requestAdd() {
+                dialog = HomeDialog.Add
+            }
+            override fun requestRename(category: CategoryUi) {
+                dialog = HomeDialog.Rename(category.id, category.name)
+            }
+            override fun requestDelete(category: CategoryUi) {
+                dialog = HomeDialog.Delete(category.id, category.name)
+            }
             override fun moveCategory(categoryId: String, toIndex: Int) = vm.moveCategory(categoryId, toIndex)
         }
     }
@@ -196,7 +202,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 DraggableAnchors {
                     DrawerValue.Closed at heightPx
                     DrawerValue.Open at 0f
-                },
+                }
             )
         }
         /** 0 = drawer closed, 1 = fully open. */
@@ -218,7 +224,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.10f), Color.Black.copy(alpha = 0.35f)))),
+                .background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.10f), Color.Black.copy(alpha = 0.35f))))
         )
 
         // Home layer: swipe up anywhere to open the drawer.
@@ -231,12 +237,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     val p = progress()
                     alpha = 1f - p
                     translationY = -p * 80.dp.toPx()
-                },
+                }
         ) {
             AnimatedVisibility(
                 visible = !(searchFocused || searching) || dragState.isDragging,
                 enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                exit = fadeOut(spring(stiffness = Spring.StiffnessMedium)),
+                exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
             ) {
                 HomeScreen(
                     categories = state.categories,
@@ -244,7 +250,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     dragState = dragState,
                     tileActions = tileActions,
                     homeActions = homeActions,
-                    modifier = Modifier.padding(bottom = 72.dp),
+                    modifier = Modifier.padding(bottom = 72.dp)
                 )
             }
             HomeSearch(
@@ -264,7 +270,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .imePadding()
-                    .padding(bottom = 12.dp),
+                    .padding(bottom = 12.dp)
             )
         }
 
@@ -280,12 +286,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 .graphicsLayer { alpha = (progress() * 1.4f).coerceAtMost(1f) }
                 .background(LatchColors.DrawerScrim)
                 .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
-                .nestedScroll(drawerScroll),
+                .nestedScroll(drawerScroll)
         ) {
             AppDrawer(
                 sections = state.drawerSections,
                 actions = tileActions,
-                listState = drawerList,
+                listState = drawerList
             )
         }
 
@@ -298,22 +304,33 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
             title = "New category",
             initial = "",
             confirm = "Add",
-            onConfirm = { vm.createCategory(it); dialog = null },
-            onDismiss = { dialog = null },
+            onConfirm = {
+                vm.createCategory(it)
+                dialog = null
+            },
+            onDismiss = { dialog = null }
         )
         is HomeDialog.Rename -> NameDialog(
             title = "Rename category",
             initial = d.name,
             confirm = "Rename",
-            onConfirm = { vm.renameCategory(d.id, it); dialog = null },
-            onDismiss = { dialog = null },
+            onConfirm = {
+                vm.renameCategory(d.id, it)
+                dialog = null
+            },
+            onDismiss = { dialog = null }
         )
         is HomeDialog.Delete -> AlertDialog(
             onDismissRequest = { dialog = null },
             title = { Text("Delete “${d.name}”?") },
             text = { Text("The apps stay installed; only this category is removed.") },
-            confirmButton = { TextButton(onClick = { vm.deleteCategory(d.id); dialog = null }) { Text("Delete") } },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Cancel") } },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.deleteCategory(d.id)
+                    dialog = null
+                }) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Cancel") } }
         )
     }
 }
@@ -329,7 +346,7 @@ private fun DragShadow(dragState: DragState) {
             .offset {
                 IntOffset(
                     (dragState.position.x - sizePx / 2).roundToInt(),
-                    (dragState.position.y - sizePx * 0.9f).roundToInt(),
+                    (dragState.position.y - sizePx * 0.9f).roundToInt()
                 )
             }
             .width(84.dp)
@@ -339,7 +356,7 @@ private fun DragShadow(dragState: DragState) {
                 alpha = 0.92f
             }
             .testTag("dragShadow"),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppIcon(dragged.entry.key, Modifier.size(52.dp))
         Text(
@@ -348,19 +365,13 @@ private fun DragShadow(dragState: DragState) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
 
 @Composable
-private fun NameDialog(
-    title: String,
-    initial: String,
-    confirm: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun NameDialog(title: String, initial: String, confirm: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var text by rememberSaveable { mutableStateOf(initial) }
     val focus = remember { FocusRequester() }
     AlertDialog(
@@ -371,7 +382,7 @@ private fun NameDialog(
                 value = text,
                 onValueChange = { text = it },
                 singleLine = true,
-                modifier = Modifier.focusRequester(focus).testTag("nameField"),
+                modifier = Modifier.focusRequester(focus).testTag("nameField")
             )
             // Inside the dialog's own composition so the field is attached; never crash over focus.
             LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -379,7 +390,7 @@ private fun NameDialog(
         confirmButton = {
             TextButton(onClick = { onConfirm(text) }, enabled = text.isNotBlank()) { Text(confirm) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
 
@@ -388,48 +399,45 @@ private fun NameDialog(
  * category list opens the drawer.
  */
 @OptIn(ExperimentalFoundationApi::class)
-private fun homeNestedScroll(
-    sheet: AnchoredDraggableState<DrawerValue>,
-    pullDownThreshold: Float,
-    onPullDown: () -> Unit,
-) = object : NestedScrollConnection {
-    private var pulled = 0f
-    private var fired = false
+private fun homeNestedScroll(sheet: AnchoredDraggableState<DrawerValue>, pullDownThreshold: Float, onPullDown: () -> Unit) =
+    object : NestedScrollConnection {
+        private var pulled = 0f
+        private var fired = false
 
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        // While the sheet is moving, keep feeding it instead of scrolling Home.
-        if (source == NestedScrollSource.UserInput && sheet.currentValue == DrawerValue.Closed && isMoving(sheet)) {
-            return Offset(0f, sheet.dispatchRawDelta(available.y))
-        }
-        return Offset.Zero
-    }
-
-    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-        if (source != NestedScrollSource.UserInput) return Offset.Zero
-        val used = sheet.dispatchRawDelta(available.y)
-        val leftover = available.y - used
-        if (leftover > 0f && sheet.currentValue == DrawerValue.Closed && !isMoving(sheet)) {
-            pulled += leftover
-            if (!fired && pulled >= pullDownThreshold) {
-                fired = true
-                onPullDown()
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            // While the sheet is moving, keep feeding it instead of scrolling Home.
+            if (source == NestedScrollSource.UserInput && sheet.currentValue == DrawerValue.Closed && isMoving(sheet)) {
+                return Offset(0f, sheet.dispatchRawDelta(available.y))
             }
-        } else if (available.y < 0f) {
-            pulled = 0f
+            return Offset.Zero
         }
-        return Offset(0f, used)
-    }
 
-    override suspend fun onPreFling(available: Velocity): Velocity {
-        pulled = 0f
-        fired = false
-        if (isMoving(sheet)) {
-            sheet.settle(available.y)
-            return available
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            if (source != NestedScrollSource.UserInput) return Offset.Zero
+            val used = sheet.dispatchRawDelta(available.y)
+            val leftover = available.y - used
+            if (leftover > 0f && sheet.currentValue == DrawerValue.Closed && !isMoving(sheet)) {
+                pulled += leftover
+                if (!fired && pulled >= pullDownThreshold) {
+                    fired = true
+                    onPullDown()
+                }
+            } else if (available.y < 0f) {
+                pulled = 0f
+            }
+            return Offset(0f, used)
         }
-        return Velocity.Zero
+
+        override suspend fun onPreFling(available: Velocity): Velocity {
+            pulled = 0f
+            fired = false
+            if (isMoving(sheet)) {
+                sheet.settle(available.y)
+                return available
+            }
+            return Velocity.Zero
+        }
     }
-}
 
 /**
  * Standard bottom-sheet nested scrolling for the drawer list: dragging down while the list is at

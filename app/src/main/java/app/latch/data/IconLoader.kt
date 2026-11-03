@@ -13,10 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
 /** Loads badged app icons off the main thread and keeps them in an LRU cache. */
-class IconLoader(
-    context: Context,
-    private val repository: AppRepository,
-) {
+class IconLoader(context: Context, private val repository: AppRepository) {
     private val density = context.resources.displayMetrics.densityDpi
     private val sizePx = (48 * context.resources.displayMetrics.density).toInt()
 

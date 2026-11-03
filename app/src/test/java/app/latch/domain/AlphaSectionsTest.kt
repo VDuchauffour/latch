@@ -8,14 +8,11 @@ import org.junit.Test
 
 class AlphaSectionsTest {
 
-    private fun collator(locale: Locale = Locale.FRENCH) =
-        Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
+    private fun collator(locale: Locale = Locale.FRENCH) = Collator.getInstance(locale).apply { strength = Collator.PRIMARY }
 
-    private fun entries(vararg labels: String) =
-        labels.mapIndexed { i, l -> AppEntry(AppKey("pkg$i", "Cls$i", 0), l) }
+    private fun entries(vararg labels: String) = labels.mapIndexed { i, l -> AppEntry(AppKey("pkg$i", "Cls$i", 0), l) }
 
-    private fun build(vararg labels: String, locale: Locale = Locale.FRENCH) =
-        AlphaSections.build(entries(*labels), collator(locale))
+    private fun build(vararg labels: String, locale: Locale = Locale.FRENCH) = AlphaSections.build(entries(*labels), collator(locale))
 
     private fun List<Section>.flat() = map { s -> s.header to s.apps.map { it.label } }
 
@@ -24,9 +21,9 @@ class AlphaSectionsTest {
         assertEquals(
             listOf(
                 "A" to listOf("AFiles", "Agenda", "Alarmé", "Album"),
-                "E" to listOf("Éditeur", "Email"),
+                "E" to listOf("Éditeur", "Email")
             ),
-            sections.flat(),
+            sections.flat()
         )
     }
 

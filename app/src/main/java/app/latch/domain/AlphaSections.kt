@@ -3,10 +3,7 @@ package app.latch.domain
 import java.text.Normalizer
 
 /** One drawer section: a header letter (or [AlphaSections.OTHER]) and its apps, already sorted. */
-data class Section(
-    val header: String,
-    val apps: List<AppEntry>,
-)
+data class Section(val header: String, val apps: List<AppEntry>)
 
 object AlphaSections {
     /** Header for labels that don't start with a letter (digits, symbols, emoji). */
@@ -28,7 +25,7 @@ object AlphaSections {
                 .thenBy { it.label }
                 .thenBy { it.key.packageName }
                 .thenBy { it.key.className }
-                .thenBy { it.key.userSerial },
+                .thenBy { it.key.userSerial }
         )
         // groupBy keeps first-appearance order and merges non-contiguous runs (e.g. locales where a
         // folded letter like Swedish "Ö" collates after "Z").

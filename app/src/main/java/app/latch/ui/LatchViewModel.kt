@@ -3,9 +3,9 @@ package app.latch.ui
 import android.graphics.Rect
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -39,7 +39,7 @@ data class CategoryUi(
     val id: String,
     val name: String,
     /** Installed apps only; uninstalled ones are filtered out. */
-    val apps: List<AppEntry>,
+    val apps: List<AppEntry>
 )
 
 data class UiState(
@@ -49,14 +49,14 @@ data class UiState(
     val drawerOpen: Boolean = false,
     val loaded: Boolean = false,
     val query: String = "",
-    val searchResults: List<AppEntry> = emptyList(),
+    val searchResults: List<AppEntry> = emptyList()
 )
 
 class LatchViewModel(
     private val repository: AppRepository,
     private val store: CategoryStore,
     private val launcher: AppLauncher,
-    private val saved: SavedStateHandle,
+    private val saved: SavedStateHandle
 ) : ViewModel() {
 
     private val expanded = saved.getStateFlow<String?>(KEY_EXPANDED, null)
@@ -77,12 +77,16 @@ class LatchViewModel(
         Triple(
             CategoryOps.resolve(categories, installed).map { (c, entries) -> CategoryUi(c.id, c.name, entries) },
             sections.orEmpty(),
-            apps != null,
+            apps != null
         )
     }.flowOn(Dispatchers.Default)
 
     val uiState: StateFlow<UiState> = combine(
-        content, expanded, drawerOpen, query, searchResults,
+        content,
+        expanded,
+        drawerOpen,
+        query,
+        searchResults
     ) { (cats, sections, loaded), exp, drawer, q, results ->
         UiState(
             categories = cats,
@@ -91,7 +95,7 @@ class LatchViewModel(
             drawerOpen = drawer,
             loaded = loaded,
             query = q,
-            searchResults = if (q.isBlank()) emptyList() else results,
+            searchResults = if (q.isBlank()) emptyList() else results
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState())
 
@@ -172,8 +176,11 @@ class LatchViewModel(
 
     /** Drop handler: from the drawer = add, from another category = move. */
     fun drop(app: AppKey, sourceCategoryId: String?, targetCategoryId: String) = edit {
-        if (sourceCategoryId == null) CategoryOps.addApp(it, targetCategoryId, app)
-        else CategoryOps.moveApp(it, sourceCategoryId, targetCategoryId, app)
+        if (sourceCategoryId == null) {
+            CategoryOps.addApp(it, targetCategoryId, app)
+        } else {
+            CategoryOps.moveApp(it, sourceCategoryId, targetCategoryId, app)
+        }
     }
 
     private fun edit(transform: (List<Category>) -> List<Category>) {
@@ -184,8 +191,7 @@ class LatchViewModel(
         private const val KEY_EXPANDED = "expanded"
         private const val KEY_DRAWER = "drawer"
 
-        private fun collator(): Collator =
-            Collator.getInstance(Locale.getDefault()).apply { strength = Collator.PRIMARY }
+        private fun collator(): Collator = Collator.getInstance(Locale.getDefault()).apply { strength = Collator.PRIMARY }
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

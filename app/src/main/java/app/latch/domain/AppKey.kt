@@ -7,8 +7,4 @@ package app.latch.domain
  * profile (personal / work), so all three parts are needed. [userSerial] is the value of
  * `UserManager.getSerialNumberForUser`, which is stable across reboots.
  */
-data class AppKey(
-    val packageName: String,
-    val className: String,
-    val userSerial: Long,
-)
+data class AppKey(val packageName: String, val className: String, val userSerial: Long)
