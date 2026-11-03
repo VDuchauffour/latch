@@ -199,6 +199,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val settingsActions = remember(vm) {
         object : SettingsActions {
             override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
+            override fun close() = vm.setSettingsOpen(false)
         }
     }
     val homeActions = remember(vm) {

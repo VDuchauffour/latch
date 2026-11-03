@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -132,6 +133,15 @@ class LatchUiTest {
         // Restore the setting for other tests.
         rule.onNodeWithTag(if (before < 7) "appsPerDrawer:minus" else "appsPerDrawer:plus").performClick()
         rule.activity.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("settings").fetchSemanticsNodes().isEmpty() }
+    }
+
+    @Test fun tappingEmptySpaceClosesLatchSettings() {
+        waitForTag("searchIcon")
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithText("Latch settings").performClick()
+        rule.onNodeWithTag("settings").assertIsDisplayed()
+        rule.onNodeWithTag("settings").performTouchInput { click(bottomCenter - Offset(0f, 100f)) }
         rule.waitUntil(3_000) { rule.onAllNodesWithTag("settings").fetchSemanticsNodes().isEmpty() }
     }
 

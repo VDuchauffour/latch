@@ -9,7 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -49,11 +49,14 @@ import app.latch.ui.theme.TextShadow
 /** Callbacks from the settings screen to the root. */
 interface SettingsActions {
     fun setAppsPerDrawer(count: Int)
+
+    /** Close the settings screen, e.g. after a tap on empty space. */
+    fun close()
 }
 
 /**
  * Latch's own settings: a centered title, then one collapsible section per settings category,
- * opened and closed like drawers on home.
+ * opened and closed like drawers on home. Tapping empty space closes the screen.
  */
 @Composable
 fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: Modifier = Modifier) {
@@ -62,8 +65,8 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
         modifier = modifier
             .fillMaxSize()
             .background(LatchColors.DrawerScrim)
-            // Swallow taps so they don't reach home underneath.
-            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+            // Taps on empty space close settings instead of reaching home underneath.
+            .pointerInput(actions) { detectTapGestures { actions.close() } }
             .systemBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(vertical = 24.dp)
@@ -113,7 +116,11 @@ private fun SettingsSection(title: String, expanded: Boolean, onToggle: () -> Un
             exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut()
         ) {
             Column(
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+                Modifier
+                    .fillMaxWidth()
+                    // Taps between controls belong to the section, not to the empty space.
+                    .pointerInput(Unit) { detectTapGestures {} }
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) { content() }
         }
