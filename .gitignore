@@ -10,3 +10,4 @@ build/
 .cxx
 .kotlin/
 .env
+PLAN.md
