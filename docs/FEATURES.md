@@ -49,7 +49,7 @@
 - Tap launches the app with a scale-up animation.
 - Long-press opens a context menu with haptic feedback:
   - in the drawer: App info;
-  - in a category: App info and Remove from category.
+  - in a category: App info and Remove from drawer.
 - Icons are loaded off the main thread into an in-memory LRU cache and refreshed when an app updates.
 
 ## Drag and drop
