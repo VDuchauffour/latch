@@ -320,7 +320,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     IntOffset(0, offset.roundToInt())
                 }
                 .graphicsLayer { alpha = (progress() * 1.4f).coerceAtMost(1f) }
-                .background(LatchColors.DrawerScrim)
+                .background(LatchColors.OverlayScrim)
                 .anchoredDraggable(sheet, Orientation.Vertical, enabled = !dragState.isDragging)
                 .nestedScroll(drawerScroll)
         ) {

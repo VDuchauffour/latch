@@ -36,6 +36,7 @@
 ## App drawer
 
 - Swipe up from home to open it, swipe down to close it; it works as a bottom sheet together with list scrolling.
+- Shown over the same lightly dimmed wallpaper as Latch settings; home fades out as it opens.
 - Lists all launchable apps A–Z with locale-aware sorting (`Collator`, so accents don't affect order).
 - Sticky letter headers. Accented initials are folded (`É` → `E`), and labels that don't start with a letter go under `#`.
 - A fast-scroller on the right edge with a letter bubble.
