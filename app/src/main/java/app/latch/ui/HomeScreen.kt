@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -298,13 +296,13 @@ private fun CategoryItem(
             enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
             exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut()
         ) {
-            CategoryApps(category, tileActions, appsPerDrawer)
+            CategoryApps(category, dragState, tileActions, appsPerDrawer)
         }
     }
 }
 
 @Composable
-private fun CategoryApps(category: CategoryUi, tileActions: TileActions, appsPerDrawer: Int) {
+private fun CategoryApps(category: CategoryUi, dragState: DragState, tileActions: TileActions, appsPerDrawer: Int) {
     if (category.apps.isEmpty()) {
         Text(
             text = "Long-press an app in the drawer (swipe up)\nand drag it here",
@@ -315,16 +313,58 @@ private fun CategoryApps(category: CategoryUi, tileActions: TileActions, appsPer
         return
     }
     val context = remember(category.id) { TileContext(category.id) }
+    DisposableEffect(category.id) {
+        onDispose { dragState.unregisterRow(category.id) }
+    }
+    val dragged = dragState.dragged
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        // Fit [appsPerDrawer] tiles across; more than that scroll horizontally.
+        // [appsPerDrawer] tiles per line; more than that wrap onto new lines.
         val tileWidth = ((maxWidth - 10.dp * 2 - 8.dp * (appsPerDrawer - 1)) / appsPerDrawer).coerceAtLeast(48.dp)
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("categoryApps:${category.name}"),
-            contentPadding = PaddingValues(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        val lines = category.apps.withIndex().chunked(appsPerDrawer)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                // Drop zone for placing an app at a position (reorder), see [DragState.insertion].
+                .onGloballyPositioned { dragState.registerRow(category.id, it.boundsInRoot()) }
+                .padding(horizontal = 10.dp, vertical = 8.dp)
+                .testTag("categoryApps:${category.name}"),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(category.apps, key = { it.key.toString() }) { entry ->
-                AppTile(entry, context, tileActions, Modifier.width(tileWidth))
+            lines.forEach { line ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    // A single line is centered; with several, a partial last line lines up with the ones above.
+                    horizontalArrangement = Arrangement.spacedBy(
+                        8.dp,
+                        if (lines.size ==
+                            1
+                        ) {
+                            Alignment.CenterHorizontally
+                        } else {
+                            Alignment.Start
+                        }
+                    )
+                ) {
+                    line.forEach { (index, entry) ->
+                        // Keyed so a tile keeps its state (and icon) when it moves to another line.
+                        key(entry.key) {
+                            DisposableEffect(entry.key) {
+                                onDispose { dragState.unregisterTile(category.id, entry.key) }
+                            }
+                            AppTile(
+                                entry = entry,
+                                context = context,
+                                actions = tileActions,
+                                modifier = Modifier
+                                    .width(tileWidth)
+                                    .onGloballyPositioned {
+                                        dragState.registerTile(category.id, entry.key, index, it.boundsInRoot())
+                                    },
+                                dimmed = dragged != null && dragged.sourceCategoryId == category.id && dragged.entry.key == entry.key
+                            )
+                        }
+                    }
+                }
             }
         }
     }

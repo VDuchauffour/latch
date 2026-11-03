@@ -10,6 +10,7 @@ import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -49,6 +50,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -169,7 +171,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
 
             override fun dragEnd() {
                 val drop = dragState.end() ?: return
-                vm.drop(drop.app.entry.key, drop.app.sourceCategoryId, drop.targetCategoryId)
+                vm.drop(drop.app.entry.key, drop.app.sourceCategoryId, drop.targetCategoryId, drop.beforeIndex)
             }
 
             override fun dragCancel() = dragState.cancel()
@@ -344,6 +346,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 SettingsScreen(state.settings, settingsActions)
             }
 
+            InsertionLine(dragState)
             DragShadow(dragState)
         }
     }
@@ -381,6 +384,29 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 }) { Text("Delete") }
             },
             dismissButton = { TextButton(onClick = { dialog = null }) { Text("Cancel") } }
+        )
+    }
+}
+
+/** Vertical white line between the two tiles where a dragged app would be dropped in an open category. */
+@Composable
+private fun InsertionLine(dragState: DragState) {
+    val at = dragState.insertion ?: return
+    val tile = at.left ?: at.right ?: return
+    Canvas(Modifier.fillMaxSize().testTag("insertionLine")) {
+        val gap = 8.dp.toPx() // Matches the row's tile spacing.
+        val x = when {
+            at.left != null && at.right != null -> (at.left.right + at.right.left) / 2
+            at.left != null -> at.left.right + gap / 2
+            else -> at.right!!.left - gap / 2
+        }
+        val width = 3.dp.toPx()
+        drawLine(
+            color = Color.White,
+            start = Offset(x, tile.top + 4.dp.toPx()),
+            end = Offset(x, tile.bottom - 4.dp.toPx()),
+            strokeWidth = width,
+            cap = StrokeCap.Round
         )
     }
 }
