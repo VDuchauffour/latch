@@ -19,6 +19,7 @@ object LatchColors {
     val DrawerScrim = Color(0xFF0B0B0B).copy(alpha = 0.82f)
     val HeaderScrim = Color(0xFF0B0B0B).copy(alpha = 0.55f)
     val Placeholder = Color.White.copy(alpha = 0.15f)
+    val SearchPanel = Color(0xFF3A3A3A).copy(alpha = 0.72f)
 }
 
 /** Soft dark shadow so white text stays readable on bright wallpapers. */

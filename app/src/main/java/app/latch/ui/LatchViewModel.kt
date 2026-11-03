@@ -17,12 +17,14 @@ import app.latch.data.CategoryStore.Companion.newId
 import app.latch.domain.AlphaSections
 import app.latch.domain.AppEntry
 import app.latch.domain.AppKey
+import app.latch.domain.AppSearch
 import app.latch.domain.Category
 import app.latch.domain.CategoryOps
 import app.latch.domain.Section
 import java.text.Collator
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -46,6 +48,8 @@ data class UiState(
     val expandedCategoryId: String? = null,
     val drawerOpen: Boolean = false,
     val loaded: Boolean = false,
+    val query: String = "",
+    val searchResults: List<AppEntry> = emptyList(),
 )
 
 class LatchViewModel(
@@ -62,6 +66,12 @@ class LatchViewModel(
         .map { apps -> apps?.let { AlphaSections.build(it, collator()) } }
         .flowOn(Dispatchers.Default)
 
+    private val query = MutableStateFlow("")
+
+    private val searchResults = combine(sections, query) { sections, q ->
+        AppSearch.match(sections.orEmpty().flatMap { it.apps }, q)
+    }.flowOn(Dispatchers.Default)
+
     private val content = combine(repository.apps, store.categories, sections) { apps, categories, sections ->
         val installed = apps.orEmpty().associateBy { it.key }
         Triple(
@@ -71,13 +81,17 @@ class LatchViewModel(
         )
     }.flowOn(Dispatchers.Default)
 
-    val uiState: StateFlow<UiState> = combine(content, expanded, drawerOpen) { (cats, sections, loaded), exp, drawer ->
+    val uiState: StateFlow<UiState> = combine(
+        content, expanded, drawerOpen, query, searchResults,
+    ) { (cats, sections, loaded), exp, drawer, q, results ->
         UiState(
             categories = cats,
             drawerSections = sections,
             expandedCategoryId = exp?.takeIf { id -> cats.any { it.id == id } },
             drawerOpen = drawer,
             loaded = loaded,
+            query = q,
+            searchResults = if (q.isBlank()) emptyList() else results,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState())
 
@@ -118,8 +132,15 @@ class LatchViewModel(
         saved[KEY_DRAWER] = open
     }
 
+    fun setQuery(text: String) {
+        query.value = text
+    }
+
+    fun clearSearch() = setQuery("")
+
     /** Home pressed while already on Home. */
     fun resetHome() {
+        clearSearch()
         collapseAll()
         setDrawerOpen(false)
     }

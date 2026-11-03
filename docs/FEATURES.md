@@ -7,7 +7,14 @@
 - An empty category shows a hint to drag apps into it.
 - "+ Add category" entry at the bottom of the list.
 - Pressing Home while already on home collapses everything and closes the drawer.
-- Back never leaves the launcher: it closes the drawer or collapses the open category.
+- Back never leaves the launcher: it closes the drawer, ends the search, or collapses the open category.
+
+## Search
+- A "Tap to search" bar sits at the bottom of home and moves up with the keyboard.
+- As you type, a panel above the bar shows up to 5 matching apps. The best match is on the right, highlighted, and launched by the keyboard's Go key.
+- Matching ignores case and accents. Label prefixes rank first, then word prefixes ("you" → "Google TV: For you"), then substrings.
+- Launching an app, opening the drawer, pressing Back, or pressing Home clears the search.
+- You can long-press a result for App info, or drag it onto a category.
 
 ## App drawer
 - Swipe up from home to open it, swipe down to close it; it works as a bottom sheet together with list scrolling.

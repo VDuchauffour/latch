@@ -3,7 +3,11 @@ package app.latch.ui
 import android.graphics.Rect
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -16,6 +20,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,12 +52,14 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.latch.domain.AppEntry
 import app.latch.ui.theme.LatchColors
@@ -84,6 +92,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val dragState = remember { DragState() }
     val drawerList = rememberLazyListState()
     var dialog by remember { mutableStateOf<HomeDialog?>(null) }
+    val focusManager = LocalFocusManager.current
 
     val sheet = remember {
         AnchoredDraggableState(
@@ -109,16 +118,37 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     }
 
     val drawerVisible = state.drawerOpen || sheet.currentValue == DrawerValue.Open || sheet.targetValue == DrawerValue.Open
+    val searching = state.query.isNotEmpty()
+    var searchFocused by remember { mutableStateOf(false) }
+    fun endSearch() {
+        focusManager.clearFocus()
+        vm.clearSearch()
+    }
+    LaunchedEffect(drawerVisible) { if (drawerVisible) endSearch() }
+    LifecycleResumeEffect(Unit) {
+        focusManager.clearFocus()
+        onPauseOrDispose {}
+    }
     // Lowest priority: never let Back finish the home activity.
     BackHandler(enabled = true) {}
-    BackHandler(enabled = drawerVisible || state.expandedCategoryId != null) {
-        if (drawerVisible) vm.setDrawerOpen(false) else vm.collapseAll()
+    BackHandler(enabled = drawerVisible || searching || state.expandedCategoryId != null) {
+        when {
+            drawerVisible -> vm.setDrawerOpen(false)
+            searching -> endSearch()
+            else -> vm.collapseAll()
+        }
     }
 
     val currentState by rememberUpdatedState(state)
     val tileActions = remember(vm, dragState) {
         object : TileActions {
-            override fun launch(entry: AppEntry, bounds: Rect?, options: Bundle?) = vm.launch(entry.key, bounds, options)
+            override fun launch(entry: AppEntry, bounds: Rect?, options: Bundle?) {
+                vm.launch(entry.key, bounds, options)
+                if (currentState.query.isNotEmpty()) {
+                    focusManager.clearFocus()
+                    vm.clearSearch()
+                }
+            }
 
             override fun menu(entry: AppEntry, context: TileContext): List<MenuAction> = buildList {
                 val categoryId = context.categoryId
@@ -144,8 +174,14 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     }
     val homeActions = remember(vm) {
         object : HomeActions {
-            override fun toggle(categoryId: String) = vm.toggleCategory(categoryId)
-            override fun collapseAll() = vm.collapseAll()
+            override fun toggle(categoryId: String) {
+                focusManager.clearFocus()
+                vm.toggleCategory(categoryId)
+            }
+            override fun collapseAll() {
+                focusManager.clearFocus()
+                vm.collapseAll()
+            }
             override fun requestAdd() { dialog = HomeDialog.Add }
             override fun requestRename(category: CategoryUi) { dialog = HomeDialog.Rename(category.id, category.name) }
             override fun requestDelete(category: CategoryUi) { dialog = HomeDialog.Delete(category.id, category.name) }
@@ -192,12 +228,38 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     translationY = -p * 80.dp.toPx()
                 },
         ) {
-            HomeScreen(
-                categories = state.categories,
-                expandedCategoryId = state.expandedCategoryId,
-                dragState = dragState,
+            AnimatedVisibility(
+                visible = !(searchFocused || searching) || dragState.isDragging,
+                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+                exit = fadeOut(spring(stiffness = Spring.StiffnessMedium)),
+            ) {
+                HomeScreen(
+                    categories = state.categories,
+                    expandedCategoryId = state.expandedCategoryId,
+                    dragState = dragState,
+                    tileActions = tileActions,
+                    homeActions = homeActions,
+                    modifier = Modifier.padding(bottom = 72.dp),
+                )
+            }
+            HomeSearch(
+                query = state.query,
+                results = state.searchResults,
+                onQueryChange = vm::setQuery,
+                onSubmit = {
+                    state.searchResults.firstOrNull()?.let { tileActions.launch(it, null, null) }
+                },
+                onFocusChange = { focused ->
+                    searchFocused = focused
+                    if (focused) vm.collapseAll()
+                },
+                onDismiss = ::endSearch,
                 tileActions = tileActions,
-                homeActions = homeActions,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .padding(bottom = 12.dp),
             )
         }
 

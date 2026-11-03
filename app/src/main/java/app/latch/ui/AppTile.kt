@@ -83,6 +83,8 @@ fun AppTile(
     actions: TileActions,
     modifier: Modifier = Modifier,
     dimmed: Boolean = false,
+    highlighted: Boolean = false,
+    tagPrefix: String = "tile",
 ) {
     val view = LocalView.current
     val haptics = LocalHapticFeedback.current
@@ -124,7 +126,7 @@ fun AppTile(
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(LatchColors.Tile)
+                .background(if (highlighted) LatchColors.TileHover else LatchColors.Tile)
                 .onGloballyPositioned { coords = it }
                 .tapLongPressDrag(entry.key, handler)
                 .alpha(if (dimmed) 0.35f else 1f)
@@ -134,7 +136,7 @@ fun AppTile(
                     onClick { handler.onTap(); true }
                     onLongClick { handler.onLongPress(); true }
                 }
-                .testTag("tile:${entry.label}"),
+                .testTag("$tagPrefix:${entry.label}"),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
         ) {
