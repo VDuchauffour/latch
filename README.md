@@ -54,3 +54,7 @@ app/src/main/java/app/latch/
  ├─ data/     AppRepository (LauncherApps), CategoryStore (DataStore JSON), IconLoader, AppLauncher
  └─ ui/       LatchViewModel, LatchScreen (root, drawer sheet), HomeScreen, AppDrawer, AppTile, DragState
 ```
+
+## License
+
+[MIT](LICENSE)
