@@ -148,7 +148,7 @@ fun AppTile(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(tileBackgroundColor(LocalTileBackground.current, highlighted))
+                .background(tileBackgroundColor(LocalTileBackground.current, LocalAccentColor.current, highlighted))
                 .onGloballyPositioned { coords = it }
                 .tapLongPressDrag(entry.key, handler)
                 .alpha(if (dimmed) 0.35f else 1f)
@@ -176,8 +176,9 @@ fun AppTile(
     }
 }
 
-private fun tileBackgroundColor(background: TileBackground, highlighted: Boolean): Color =
-    Color.White.copy(alpha = background.alpha + if (highlighted) TILE_HIGHLIGHT_ALPHA else 0f)
+fun tileBackgroundColor(background: TileBackground, accent: Color, highlighted: Boolean = false): Color =
+    (if (background.accent) accent else Color.White)
+        .copy(alpha = background.alpha + if (highlighted) TILE_HIGHLIGHT_ALPHA else 0f)
 
 private const val TILE_HIGHLIGHT_ALPHA = 0.10f
 
@@ -186,7 +187,7 @@ fun TilePreview(entry: AppEntry, background: TileBackground, modifier: Modifier 
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(tileBackgroundColor(background, highlighted = false))
+            .background(tileBackgroundColor(background, LocalAccentColor.current))
             .padding(horizontal = 4.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top

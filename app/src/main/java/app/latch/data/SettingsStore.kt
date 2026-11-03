@@ -25,12 +25,14 @@ data class LatchSettings(
     }
 }
 
-enum class TileBackground(val label: String, val alpha: Float) {
+/** The box behind each app tile: white at [alpha], or the accent color at [alpha] when [accent]. */
+enum class TileBackground(val label: String, val alpha: Float, val accent: Boolean = false) {
     None("None", 0f),
     Faint("Faint", 0.04f),
     Subtle("Subtle", 0.08f),
     Medium("Medium", 0.14f),
-    LightGray("Light gray", 0.22f);
+    LightGray("Light gray", 0.22f),
+    Accent("Accent", 0.28f, accent = true);
 
     companion object {
         val DEFAULT = Subtle

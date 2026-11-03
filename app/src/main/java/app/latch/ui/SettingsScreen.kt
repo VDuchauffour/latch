@@ -343,7 +343,7 @@ private fun TileBackgroundDialog(
                             Modifier
                                 .size(width = 72.dp, height = 56.dp)
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = shade.alpha))
+                                .background(tileBackgroundColor(shade, LocalAccentColor.current))
                         )
                     }
                 }
