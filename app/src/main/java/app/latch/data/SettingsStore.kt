@@ -40,15 +40,15 @@ enum class TileBackground(val label: String, val alpha: Float) {
 /** Highlight color for selected and active elements, as 0xAARRGGBB. Yellow matches the original look. */
 enum class AccentColor(val label: String, val argb: Long) {
     Yellow("Yellow", 0xFFFFFC33),
-    Lime("Lime", 0xFFB8FF33),
-    Mint("Mint", 0xFF33FFB5),
-    Cyan("Cyan", 0xFF33E0FF),
-    Blue("Blue", 0xFF4D8DFF),
-    Violet("Violet", 0xFFB36BFF),
-    Pink("Pink", 0xFFFF4FA3),
-    Coral("Coral", 0xFFFF5C5C),
+    Amber("Amber", 0xFFFFC233),
     Orange("Orange", 0xFFFF8A33),
-    Amber("Amber", 0xFFFFC233);
+    Coral("Coral", 0xFFFF5C5C),
+    Pink("Pink", 0xFFFF4FA3),
+    Violet("Violet", 0xFFB36BFF),
+    Blue("Blue", 0xFF4D8DFF),
+    Cyan("Cyan", 0xFF33E0FF),
+    Mint("Mint", 0xFF33FFB5),
+    Lime("Lime", 0xFFB8FF33);
 
     companion object {
         val DEFAULT = Yellow
