@@ -161,7 +161,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
 
             override fun menu(entry: AppEntry, context: TileContext): List<MenuAction> = buildList {
                 val categoryId = context.categoryId
-                if (categoryId != null) add(MenuAction("Remove from category") { vm.removeFromCategory(categoryId, entry.key) })
+                if (categoryId != null) add(MenuAction("Remove from drawer") { vm.removeFromCategory(categoryId, entry.key) })
                 add(MenuAction("App info") { vm.openAppInfo(entry.key, null) })
             }
 
