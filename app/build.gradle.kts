@@ -1,3 +1,17 @@
+// Release version comes from the git tag in CI (`-PversionName=1.2.3`); local builds keep the default.
+val appVersionName: String = providers.gradleProperty("versionName").getOrElse("0.1.0")
+
+// Monotonic versionCode derived from the semver: 1.2.3 -> 10203 (minor/patch must stay below 100).
+val appVersionCode: Int =
+    appVersionName
+        .substringBefore('-')
+        .split('.')
+        .map { it.toInt() }
+        .let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+
+// Release signing key, provided by CI from repository secrets. Without it, release falls back to the debug key.
+val releaseKeystore: String? = System.getenv("LATCH_KEYSTORE_FILE")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,9 +27,20 @@ android {
         applicationId = "app.latch"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("LATCH_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("LATCH_KEY_ALIAS")
+                keyPassword = System.getenv("LATCH_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -23,8 +48,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Signed with the debug key so `assembleRelease` produces an installable APK out of the box.
-            signingConfig = signingConfigs.getByName("debug")
+            // Signed with the release key in CI; locally the debug key, so `assembleRelease` still produces an
+            // installable APK out of the box.
+            signingConfig = signingConfigs.getByName(if (releaseKeystore != null) "release" else "debug")
         }
     }
     compileOptions {
