@@ -14,6 +14,8 @@ import app.latch.data.AppLauncher
 import app.latch.data.AppRepository
 import app.latch.data.CategoryStore
 import app.latch.data.CategoryStore.Companion.newId
+import app.latch.data.LatchSettings
+import app.latch.data.SettingsStore
 import app.latch.domain.AlphaSections
 import app.latch.domain.AppEntry
 import app.latch.domain.AppKey
@@ -49,18 +51,22 @@ data class UiState(
     val drawerOpen: Boolean = false,
     val loaded: Boolean = false,
     val query: String = "",
-    val searchResults: List<AppEntry> = emptyList()
+    val searchResults: List<AppEntry> = emptyList(),
+    val settings: LatchSettings = LatchSettings(),
+    val settingsOpen: Boolean = false
 )
 
 class LatchViewModel(
     private val repository: AppRepository,
     private val store: CategoryStore,
+    private val settingsStore: SettingsStore,
     private val launcher: AppLauncher,
     private val saved: SavedStateHandle
 ) : ViewModel() {
 
     private val expanded = saved.getStateFlow<String?>(KEY_EXPANDED, null)
     private val drawerOpen = saved.getStateFlow(KEY_DRAWER, false)
+    private val settingsOpen = saved.getStateFlow(KEY_SETTINGS, false)
 
     private val sections = repository.apps
         .map { apps -> apps?.let { AlphaSections.build(it, collator()) } }
@@ -81,13 +87,17 @@ class LatchViewModel(
         )
     }.flowOn(Dispatchers.Default)
 
+    private val screen = combine(settingsStore.settings, settingsOpen) { settings, open -> settings to open }
+
     val uiState: StateFlow<UiState> = combine(
-        content,
+        combine(content, screen, ::Pair),
         expanded,
         drawerOpen,
         query,
         searchResults
-    ) { (cats, sections, loaded), exp, drawer, q, results ->
+    ) { (content, screen), exp, drawer, q, results ->
+        val (cats, sections, loaded) = content
+        val (settings, settingsOpen) = screen
         UiState(
             categories = cats,
             drawerSections = sections,
@@ -95,7 +105,9 @@ class LatchViewModel(
             drawerOpen = drawer,
             loaded = loaded,
             query = q,
-            searchResults = if (q.isBlank()) emptyList() else results
+            searchResults = if (q.isBlank()) emptyList() else results,
+            settings = settings,
+            settingsOpen = settingsOpen
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState())
 
@@ -147,6 +159,17 @@ class LatchViewModel(
         clearSearch()
         collapseAll()
         setDrawerOpen(false)
+        setSettingsOpen(false)
+    }
+
+    fun setSettingsOpen(open: Boolean) {
+        saved[KEY_SETTINGS] = open
+    }
+
+    // --- Settings ---
+
+    fun setAppsPerDrawer(count: Int) {
+        viewModelScope.launch { settingsStore.setAppsPerDrawer(count) }
     }
 
     // --- Apps ---
@@ -156,8 +179,6 @@ class LatchViewModel(
     fun openAppInfo(key: AppKey, bounds: Rect?) = launcher.openAppInfo(key, bounds)
 
     fun expandNotifications() = launcher.expandNotifications()
-
-    fun openSystemSettings() = launcher.openSystemSettings()
 
     // --- Categories ---
 
@@ -192,13 +213,14 @@ class LatchViewModel(
     companion object {
         private const val KEY_EXPANDED = "expanded"
         private const val KEY_DRAWER = "drawer"
+        private const val KEY_SETTINGS = "settings"
 
         private fun collator(): Collator = Collator.getInstance(Locale.getDefault()).apply { strength = Collator.PRIMARY }
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as LatchApp
-                LatchViewModel(app.apps, app.categories, app.launcher, createSavedStateHandle())
+                LatchViewModel(app.apps, app.categories, app.settings, app.launcher, createSavedStateHandle())
             }
         }
     }

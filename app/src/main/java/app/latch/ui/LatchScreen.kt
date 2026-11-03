@@ -176,7 +176,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     val quickActions = remember(vm) {
         listOf(
             QuickAction("Add drawer", QuickIcon.AddDrawer) { dialog = HomeDialog.Add },
-            QuickAction("Android settings", QuickIcon.Settings, vm::openSystemSettings)
+            QuickAction("Latch settings", QuickIcon.Settings) { vm.setSettingsOpen(true) }
         )
     }
     val quickGesture = remember(vm, quickMenu, quickActions) {
@@ -195,6 +195,12 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
     }
     LaunchedEffect(drawerVisible) { if (drawerVisible) quickMenu.close() }
     BackHandler(enabled = quickMenu.isOpen) { quickMenu.close() }
+    BackHandler(enabled = state.settingsOpen) { vm.setSettingsOpen(false) }
+    val settingsActions = remember(vm) {
+        object : SettingsActions {
+            override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
+        }
+    }
     val homeActions = remember(vm) {
         object : HomeActions {
             override fun toggle(categoryId: String) {
@@ -270,6 +276,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                     dragState = dragState,
                     tileActions = tileActions,
                     homeActions = homeActions,
+                    appsPerDrawer = state.settings.appsPerDrawer,
                     modifier = Modifier.padding(bottom = 72.dp)
                 )
             }
@@ -317,6 +324,14 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         }
 
         QuickMenu(quickMenu, quickActions)
+
+        AnimatedVisibility(
+            visible = state.settingsOpen,
+            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)),
+            exit = fadeOut(spring(stiffness = Spring.StiffnessMedium))
+        ) {
+            SettingsScreen(state.settings, settingsActions)
+        }
 
         DragShadow(dragState)
     }

@@ -74,6 +74,7 @@ fun HomeScreen(
     dragState: DragState,
     tileActions: TileActions,
     homeActions: HomeActions,
+    appsPerDrawer: Int,
     modifier: Modifier = Modifier
 ) {
     // --- Category reordering (local order while dragging, committed on release) ---
@@ -161,6 +162,7 @@ fun HomeScreen(
                             dragState = dragState,
                             tileActions = tileActions,
                             homeActions = homeActions,
+                            appsPerDrawer = appsPerDrawer,
                             reorder = reorder,
                             reordering = category.id == reorderingId,
                             reorderOffsetY = reorderOffset
@@ -186,6 +188,7 @@ private fun CategoryItem(
     dragState: DragState,
     tileActions: TileActions,
     homeActions: HomeActions,
+    appsPerDrawer: Int,
     reorder: ReorderCallbacks,
     reordering: Boolean,
     reorderOffsetY: (String) -> Float
@@ -295,13 +298,13 @@ private fun CategoryItem(
             enter = expandVertically(spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
             exit = shrinkVertically(spring(stiffness = Spring.StiffnessMedium)) + fadeOut()
         ) {
-            CategoryApps(category, tileActions)
+            CategoryApps(category, tileActions, appsPerDrawer)
         }
     }
 }
 
 @Composable
-private fun CategoryApps(category: CategoryUi, tileActions: TileActions) {
+private fun CategoryApps(category: CategoryUi, tileActions: TileActions, appsPerDrawer: Int) {
     if (category.apps.isEmpty()) {
         Text(
             text = "Long-press an app in the drawer (swipe up)\nand drag it here",
@@ -313,7 +316,8 @@ private fun CategoryApps(category: CategoryUi, tileActions: TileActions) {
     }
     val context = remember(category.id) { TileContext(category.id) }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val tileWidth = ((maxWidth - 10.dp * 2 - 8.dp * 4) / 5).coerceAtLeast(64.dp)
+        // Fit [appsPerDrawer] tiles across; more than that scroll horizontally.
+        val tileWidth = ((maxWidth - 10.dp * 2 - 8.dp * (appsPerDrawer - 1)) / appsPerDrawer).coerceAtLeast(48.dp)
         LazyRow(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("categoryApps:${category.name}"),
             contentPadding = PaddingValues(horizontal = 10.dp),

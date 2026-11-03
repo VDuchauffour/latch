@@ -107,11 +107,32 @@ class LatchUiTest {
         waitForTag("searchIcon")
         rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
         rule.onNodeWithTag("quickMenu").assertIsDisplayed()
-        listOf("Add drawer", "Android settings").forEach {
+        listOf("Add drawer", "Latch settings").forEach {
             rule.onNodeWithText(it).assertIsDisplayed()
         }
         rule.onNodeWithText("Add drawer").performClick()
         rule.onNodeWithText("New category").assertIsDisplayed()
+    }
+
+    @Test fun latchSettingsOpensWithAppearanceSection() {
+        waitForTag("searchIcon")
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithText("Latch settings").performClick()
+        rule.onNodeWithTag("settings").assertIsDisplayed()
+        rule.onNodeWithTag("settingsSection:Appearance").performClick()
+        rule.onNodeWithText("Apps per drawer").assertIsDisplayed()
+        val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
+            .config[SemanticsProperties.Text].first().text.toInt()
+        val button = if (before < 7) "appsPerDrawer:plus" else "appsPerDrawer:minus"
+        rule.onNodeWithTag(button).performClick()
+        rule.waitUntil(3_000) {
+            rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
+                .config[SemanticsProperties.Text].first().text.toInt() != before
+        }
+        // Restore the setting for other tests.
+        rule.onNodeWithTag(if (before < 7) "appsPerDrawer:minus" else "appsPerDrawer:plus").performClick()
+        rule.activity.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("settings").fetchSemanticsNodes().isEmpty() }
     }
 
     @Test fun slidingFromSearchIconRunsHighlightedButton() {

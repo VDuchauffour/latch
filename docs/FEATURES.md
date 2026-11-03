@@ -21,7 +21,13 @@
 - Long-press the magnifying glass in the search bar to open a column of round buttons above it over a dimmed home. Tapping the magnifying glass still starts a search.
 - Without lifting your finger, slide up and down: the button under it turns yellow and shifts left, with a haptic tick. Release to run it.
 - Releasing always closes the menu; if no button was highlighted, nothing runs.
-- Buttons: Add drawer (opens the new-category dialog) and Android settings (gear icon, opens the system Settings app).
+- Buttons: Add drawer (opens the new-category dialog) and Latch settings (gear icon, opens the Latch settings screen).
+
+## Latch settings
+- A full-screen page over home with a centered "Latch settings" title; Back or Home closes it.
+- Settings are grouped in sections that open and close like drawers on home (tap the name; one at a time).
+- Appearance: Apps per drawer (3–7, default 5) sets how many app tiles fit across an open drawer; extra apps scroll sideways.
+- Settings are saved to DataStore.
 
 ## App drawer
 - Swipe up from home to open it, swipe down to close it; it works as a bottom sheet together with list scrolling.
