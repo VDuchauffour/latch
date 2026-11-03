@@ -9,18 +9,18 @@ Requirements: JDK 17, Android SDK with platform 35.
 One-time setup (installs JDK 17, the Android SDK, and yq via [mise](https://mise.jdx.dev/), then accepts SDK licenses):
 
 ```sh
-mise install               # or: just setup (also accepts SDK licenses)
+mise install # or: just setup (also accepts SDK licenses)
 ```
 
 ```sh
 ./gradlew installDebug
-adb shell cmd package set-home-activity app.latch/.MainActivity   # make Latch the home app
+adb shell cmd package set-home-activity app.latch/.MainActivity # make Latch the home app
 ```
 
 With multiple devices/emulators connected, target one via `adb`'s serial:
 
 ```sh
-export ANDROID_SERIAL=emulator-5554   # gradle installDebug and connected tests use only this device
+export ANDROID_SERIAL=emulator-5554 # gradle installDebug and connected tests use only this device
 ```
 
 Release build (R8 + resource shrinking; signed with the debug key for convenience):
@@ -32,8 +32,8 @@ Release build (R8 + resource shrinking; signed with the debug key for convenienc
 ## Tests
 
 ```sh
-./gradlew testDebugUnitTest            # JVM: AlphaSections, CategoryOps, JSON codec
-./gradlew connectedDebugAndroidTest    # device/emulator: CategoryStore persistence, Compose UI
+./gradlew testDebugUnitTest         # JVM: AlphaSections, CategoryOps, JSON codec
+./gradlew connectedDebugAndroidTest # device/emulator: CategoryStore persistence, Compose UI
 ```
 
 Note: installing the test APK can reset the default home app; run `set-home-activity` again afterwards.
