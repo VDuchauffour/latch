@@ -58,7 +58,6 @@ import app.latch.ui.theme.LatchType
 interface HomeActions {
     fun toggle(categoryId: String)
     fun collapseAll()
-    fun requestAdd()
     fun requestRename(category: CategoryUi)
     fun requestDelete(category: CategoryUi)
     fun moveCategory(categoryId: String, toIndex: Int)
@@ -168,22 +167,6 @@ fun HomeScreen(
                         )
                     }
                 }
-                Text(
-                    text = "+ Add category",
-                    style = LatchType.Hint,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 20.dp)
-                        .semantics {
-                            onClick {
-                                homeActions.requestAdd()
-                                true
-                            }
-                        }
-                        .tapLongPressDrag(Unit, SimpleTap { homeActions.requestAdd() })
-                        .padding(horizontal = 24.dp, vertical = 12.dp)
-                        .testTag("addCategory")
-                )
             }
         }
     }
@@ -194,16 +177,6 @@ private interface ReorderCallbacks {
     fun move(rootY: Float)
     fun end()
     fun cancel()
-}
-
-/** Handler that only reacts to taps. */
-private class SimpleTap(private val tap: () -> Unit) : TapLongPressDragHandler {
-    override fun onTap() = tap()
-    override fun onLongPress() = Unit
-    override fun onDragStart(local: Offset) = Unit
-    override fun onDrag(local: Offset) = Unit
-    override fun onDragEnd() = Unit
-    override fun onDragCancel() = Unit
 }
 
 @Composable

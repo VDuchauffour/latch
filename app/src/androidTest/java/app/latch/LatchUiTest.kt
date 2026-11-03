@@ -1,5 +1,6 @@
 package app.latch
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -35,12 +36,18 @@ class LatchUiTest {
         n.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("category:") == true
     }
 
+    /** Home has no add entry; new categories come from the quick menu's "Add drawer". */
+    private fun openAddDialog() {
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithText("Add drawer").performClick()
+    }
+
     /** Home starts with no categories, so create one through the UI when needed. */
     private fun firstCategoryTag(): String {
-        waitForTag("addCategory")
+        waitForTag("searchIcon")
         rule.waitForIdle()
         if (rule.onAllNodes(isCategory).fetchSemanticsNodes().isEmpty()) {
-            rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
+            openAddDialog()
             rule.onNode(hasTestTag("nameField")).performTextInput("Test")
             rule.onNodeWithText("Add").performClick()
         }
@@ -96,10 +103,29 @@ class LatchUiTest {
         rule.onNodeWithText("App info").assertIsDisplayed()
     }
 
-    @Test fun addCategoryEntryOpensDialog() {
-        waitForTag("addCategory")
-        rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
+    @Test fun longPressSearchIconOpensQuickMenu() {
+        waitForTag("searchIcon")
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithTag("quickMenu").assertIsDisplayed()
+        listOf("Add drawer", "Android settings").forEach {
+            rule.onNodeWithText(it).assertIsDisplayed()
+        }
+        rule.onNodeWithText("Add drawer").performClick()
         rule.onNodeWithText("New category").assertIsDisplayed()
-        rule.onNode(hasTestTag("nameField")).assertIsDisplayed()
+    }
+
+    @Test fun slidingFromSearchIconRunsHighlightedButton() {
+        waitForTag("searchIcon")
+        val icon = rule.onNodeWithTag("searchIcon")
+        icon.performTouchInput { down(center) }
+        rule.mainClock.advanceTimeBy(1_000)
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("quickAction:0").fetchSemanticsNodes().isNotEmpty() }
+        val targetY = rule.onNodeWithTag("quickAction:0").fetchSemanticsNode().boundsInRoot.center.y
+        val iconTop = icon.fetchSemanticsNode().boundsInRoot.top
+        icon.performTouchInput {
+            moveTo(Offset(center.x, targetY - iconTop))
+            up()
+        }
+        rule.onNodeWithText("New category").assertIsDisplayed()
     }
 }

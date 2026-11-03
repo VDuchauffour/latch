@@ -5,7 +5,7 @@
 - A centered list of user-defined categories; none exist on first launch.
 - Tap a category to expand it accordion-style into a horizontal row of app tiles; only one is open at a time.
 - An empty category shows a hint to drag apps into it.
-- "+ Add category" entry at the bottom of the list.
+- New categories are added from the quick menu ("Add drawer").
 - Pressing Home while already on home collapses everything and closes the drawer.
 - Swipe down on home (with the category list at its top) to pull down the notification shade.
 - Back never leaves the launcher: it closes the drawer, ends the search, or collapses the open category.
@@ -16,6 +16,12 @@
 - Matching ignores case and accents. Label prefixes rank first, then word prefixes ("you" → "Google TV: For you"), then substrings.
 - Launching an app, opening the drawer, pressing Back, or pressing Home clears the search.
 - You can long-press a result for App info, or drag it onto a category.
+
+## Quick menu
+- Long-press the magnifying glass in the search bar to open a column of round buttons above it over a dimmed home. Tapping the magnifying glass still starts a search.
+- Without lifting your finger, slide up and down: the button under it turns yellow and shifts left, with a haptic tick. Release to run it.
+- Releasing always closes the menu; if no button was highlighted, nothing runs.
+- Buttons: Add drawer (opens the new-category dialog) and Android settings (gear icon, opens the system Settings app).
 
 ## App drawer
 - Swipe up from home to open it, swipe down to close it; it works as a bottom sheet together with list scrolling.
