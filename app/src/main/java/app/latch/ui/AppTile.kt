@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -137,6 +138,8 @@ fun AppTile(
     Box(modifier) {
         Column(
             modifier = Modifier
+                // Fill the tile's width so every tile's background is the same size, whatever the label.
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(if (highlighted) LatchColors.TileHover else LatchColors.Tile)
                 .onGloballyPositioned { coords = it }
