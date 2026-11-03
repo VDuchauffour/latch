@@ -36,12 +36,18 @@ class LatchUiTest {
         n.config.getOrNull(SemanticsProperties.TestTag)?.startsWith("category:") == true
     }
 
+    /** Home has no add entry; new categories come from the quick menu's "Add drawer". */
+    private fun openAddDialog() {
+        rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
+        rule.onNodeWithText("Add drawer").performClick()
+    }
+
     /** Home starts with no categories, so create one through the UI when needed. */
     private fun firstCategoryTag(): String {
-        waitForTag("addCategory")
+        waitForTag("searchIcon")
         rule.waitForIdle()
         if (rule.onAllNodes(isCategory).fetchSemanticsNodes().isEmpty()) {
-            rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
+            openAddDialog()
             rule.onNode(hasTestTag("nameField")).performTextInput("Test")
             rule.onNodeWithText("Add").performClick()
         }
@@ -95,13 +101,6 @@ class LatchUiTest {
             }
         ).onFirst().performSemanticsAction(SemanticsActions.OnLongClick)
         rule.onNodeWithText("App info").assertIsDisplayed()
-    }
-
-    @Test fun addCategoryEntryOpensDialog() {
-        waitForTag("addCategory")
-        rule.onNodeWithTag("addCategory").performSemanticsAction(SemanticsActions.OnClick)
-        rule.onNodeWithText("New category").assertIsDisplayed()
-        rule.onNode(hasTestTag("nameField")).assertIsDisplayed()
     }
 
     @Test fun longPressSearchIconOpensQuickMenu() {

@@ -5,7 +5,7 @@
 - A centered list of user-defined categories; none exist on first launch.
 - Tap a category to expand it accordion-style into a horizontal row of app tiles; only one is open at a time.
 - An empty category shows a hint to drag apps into it.
-- "+ Add category" entry at the bottom of the list.
+- New categories are added from the quick menu ("Add drawer").
 - Pressing Home while already on home collapses everything and closes the drawer.
 - Swipe down on home (with the category list at its top) to pull down the notification shade.
 - Back never leaves the launcher: it closes the drawer, ends the search, or collapses the open category.

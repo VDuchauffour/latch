@@ -205,9 +205,6 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
                 focusManager.clearFocus()
                 vm.collapseAll()
             }
-            override fun requestAdd() {
-                dialog = HomeDialog.Add
-            }
             override fun requestRename(category: CategoryUi) {
                 dialog = HomeDialog.Rename(category.id, category.name)
             }
