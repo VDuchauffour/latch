@@ -157,16 +157,21 @@ private fun SettingsSection(
 
 private val SettingLabel = TextStyle(color = LatchColors.Text, fontSize = 18.sp, fontWeight = FontWeight.Bold, shadow = TextShadow)
 
-/** [text] preceded by a white [icon]. */
+/** Width reserved for every label's icon, so section titles and setting names start at the same x. */
+private val IconSlot = 24.dp
+
+/** [text] preceded by a white [icon], centered in a fixed-width slot. */
 @Composable
 private fun IconLabel(text: String, @DrawableRes icon: Int, iconSize: Dp, style: TextStyle, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            tint = LatchColors.Text,
-            modifier = Modifier.size(iconSize)
-        )
+        Box(Modifier.width(IconSlot), contentAlignment = Alignment.Center) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = LatchColors.Text,
+                modifier = Modifier.size(iconSize)
+            )
+        }
         Text(text, style = style, modifier = Modifier.padding(start = 12.dp))
     }
 }
