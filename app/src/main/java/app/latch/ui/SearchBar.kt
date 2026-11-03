@@ -64,6 +64,9 @@ private val SearchTileContext = TileContext(categoryId = null)
 
 private const val MAX_RESULTS = 5
 
+/** Hold time on the search icon before the quick menu opens; shorter than the system long-press so it feels instant. */
+private const val QUICK_MENU_HOLD_MS = 180L
+
 /** Long-press on the search icon, then slide and release over a quick-menu button. */
 interface QuickMenuGesture {
     fun open()
@@ -212,7 +215,7 @@ private fun SearchField(
                     awaitEachGesture {
                         val down = awaitFirstDown()
                         var up: PointerInputChange? = null
-                        val timedOut = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                        val timedOut = withTimeoutOrNull(QUICK_MENU_HOLD_MS) {
                             up = waitForUpOrCancellation()
                         } == null
                         if (!timedOut) {

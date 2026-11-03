@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
@@ -113,8 +114,8 @@ private val RowGap = 16.dp
 fun QuickMenu(state: QuickMenuState, actions: List<QuickAction>, modifier: Modifier = Modifier) {
     AnimatedVisibility(
         visible = state.isOpen,
-        enter = fadeIn(spring(stiffness = Spring.StiffnessMedium)),
-        exit = fadeOut(spring(stiffness = Spring.StiffnessMedium)),
+        enter = fadeIn(tween(60)),
+        exit = fadeOut(tween(120)),
         modifier = modifier
     ) {
         val halfGap = with(LocalDensity.current) { RowGap.toPx() } / 2f
