@@ -21,8 +21,7 @@ object CategoryOps {
         return normalize(categories.map { if (it.id == id) it.copy(name = clean) else it })
     }
 
-    fun delete(categories: List<Category>, id: String): List<Category> =
-        normalize(categories.filterNot { it.id == id })
+    fun delete(categories: List<Category>, id: String): List<Category> = normalize(categories.filterNot { it.id == id })
 
     /** Adds [app] at the end of the category; no-op if it's already there. */
     fun addApp(categories: List<Category>, id: String, app: AppKey): List<Category> =
@@ -52,8 +51,7 @@ object CategoryOps {
         normalize(categories.map { c -> if (c.apps.any(isGone)) c.copy(apps = c.apps.filterNot(isGone)) else c })
 
     /** Removes every app not in [installed] from all categories. */
-    fun pruneTo(categories: List<Category>, installed: Set<AppKey>): List<Category> =
-        prune(categories) { it !in installed }
+    fun pruneTo(categories: List<Category>, installed: Set<AppKey>): List<Category> = prune(categories) { it !in installed }
 
     /** Resolves each category's keys to installed [AppEntry]s, preserving the category's own app order. */
     fun resolve(categories: List<Category>, installed: Map<AppKey, AppEntry>): List<Pair<Category, List<AppEntry>>> =

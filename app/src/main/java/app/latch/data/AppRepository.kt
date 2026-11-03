@@ -34,10 +34,7 @@ data class PackageChange(val packageName: String, val userSerial: Long)
  * Lists launchable activities for every user profile and keeps the list fresh with
  * [LauncherApps.Callback]. [apps] is `null` until the first load has finished.
  */
-class AppRepository(
-    private val context: Context,
-    private val scope: CoroutineScope,
-) {
+class AppRepository(private val context: Context, private val scope: CoroutineScope) {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
 

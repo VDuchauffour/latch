@@ -90,12 +90,7 @@ private val DrawerTileContext = TileContext(categoryId = null)
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppDrawer(
-    sections: List<Section>,
-    actions: TileActions,
-    listState: LazyListState,
-    modifier: Modifier = Modifier,
-) {
+fun AppDrawer(sections: List<Section>, actions: TileActions, listState: LazyListState, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.testTag("drawer")) {
         val columns = if (maxWidth >= 360.dp) 5 else 4
         val layout = remember(sections, columns) { DrawerLayout(sections, columns) }
@@ -113,8 +108,8 @@ fun AppDrawer(
                 start = 10.dp,
                 end = 22.dp, // room for the fast-scroller
                 top = 24.dp,
-                bottom = insets.calculateBottomPadding() + 24.dp,
-            ),
+                bottom = insets.calculateBottomPadding() + 24.dp
+            )
         ) {
             sections.forEach { section ->
                 stickyHeader(key = "h:${section.header}", contentType = "header") {
@@ -124,7 +119,7 @@ fun AppDrawer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(LatchColors.HeaderScrim, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 4.dp),
+                            .padding(horizontal = 14.dp, vertical = 4.dp)
                     )
                 }
                 val rows = section.apps.chunked(columns)
@@ -132,7 +127,7 @@ fun AppDrawer(
                     item(key = "r:${section.header}:$r", contentType = "row") {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             row.forEach { entry ->
                                 AppTile(entry, DrawerTileContext, actions, Modifier.weight(1f))
@@ -152,19 +147,14 @@ fun AppDrawer(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(top = insets.calculateTopPadding() + 24.dp, bottom = insets.calculateBottomPadding() + 24.dp)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
             )
         }
     }
 }
 
 @Composable
-private fun FastScroller(
-    sections: List<Section>,
-    layout: DrawerLayout,
-    listState: LazyListState,
-    modifier: Modifier = Modifier,
-) {
+private fun FastScroller(sections: List<Section>, layout: DrawerLayout, listState: LazyListState, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val density = LocalDensity.current
@@ -217,7 +207,7 @@ private fun FastScroller(
             .width(28.dp)
             .testTag("fastScroller")
             .onSizeChanged { trackHeight = it.height.coerceAtLeast(1) }
-            .pointerInput(sections, layout, scrollerInput),
+            .pointerInput(sections, layout, scrollerInput)
     ) {
         // Thumb
         Box(
@@ -226,7 +216,7 @@ private fun FastScroller(
                 .offset { IntOffset(0, ((trackHeight - thumbHeightPx) * fraction).roundToInt()) }
                 .size(width = 5.dp, height = thumbHeight)
                 .clip(RoundedCornerShape(3.dp))
-                .background(Color.White.copy(alpha = if (dragging) 1f else 0.7f)),
+                .background(Color.White.copy(alpha = if (dragging) 1f else 0.7f))
         )
         // Letter bubble
         AnimatedVisibility(
@@ -239,20 +229,20 @@ private fun FastScroller(
                     val bubble = 64.dp.toPx()
                     IntOffset(
                         x = -48.dp.roundToPx(),
-                        y = ((trackHeight - thumbHeightPx) * fraction + thumbHeightPx / 2 - bubble / 2).roundToInt(),
+                        y = ((trackHeight - thumbHeightPx) * fraction + thumbHeightPx / 2 - bubble / 2).roundToInt()
                     )
-                },
+                }
         ) {
             Box(
                 // requiredSize: the 28dp-wide scroller track must not squeeze the bubble.
                 Modifier.requiredSize(64.dp).clip(CircleShape).background(Color.White),
-                contentAlignment = Alignment.Center,
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = sections.getOrNull(dragSection)?.header.orEmpty(),
                     color = Color.Black,
                     fontSize = 30.sp,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.ExtraBold
                 )
             }
         }

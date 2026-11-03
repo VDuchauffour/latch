@@ -24,6 +24,5 @@ object AppSearch {
     private val WORD_BREAK = Regex("[^\\p{L}\\p{N}]+")
     private val MARKS = Regex("\\p{Mn}+")
 
-    internal fun normalize(s: String): String =
-        MARKS.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase()
+    internal fun normalize(s: String): String = MARKS.replace(Normalizer.normalize(s, Normalizer.Form.NFD), "").lowercase()
 }

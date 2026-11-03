@@ -11,7 +11,7 @@ class CategoryCodecTest {
     private val sample = listOf(
         Category("1", "Talk", 0, listOf(AppKey("com.example.chat", "com.example.chat.MainActivity", 0))),
         Category("2", "Listen", 1, listOf(AppKey("com.example.music", "com.example.music.MainActivity", 10))),
-        Category("3", "Émojis 🎉 \"quoted\"", 2, emptyList()),
+        Category("3", "Émojis 🎉 \"quoted\"", 2, emptyList())
     )
 
     @Test fun `round trip preserves everything`() {

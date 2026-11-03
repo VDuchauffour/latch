@@ -12,7 +12,7 @@ import app.latch.domain.AppEntry
 data class DraggedApp(
     val entry: AppEntry,
     /** Category the drag started from, or null when it started in the drawer. */
-    val sourceCategoryId: String?,
+    val sourceCategoryId: String?
 )
 
 data class Drop(val app: DraggedApp, val targetCategoryId: String)

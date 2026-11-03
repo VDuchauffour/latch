@@ -30,24 +30,16 @@ object CategoryCodec {
     }
 
     @Serializable
-    private data class Document(
-        val version: Int = CURRENT_VERSION,
-        val categories: List<CategoryDto> = emptyList(),
-    )
+    private data class Document(val version: Int = CURRENT_VERSION, val categories: List<CategoryDto> = emptyList())
 
     @Serializable
-    private data class CategoryDto(
-        val id: String,
-        val name: String,
-        val order: Int = 0,
-        val apps: List<AppKeyDto> = emptyList(),
-    )
+    private data class CategoryDto(val id: String, val name: String, val order: Int = 0, val apps: List<AppKeyDto> = emptyList())
 
     @Serializable
     private data class AppKeyDto(
         @SerialName("pkg") val pkg: String,
         @SerialName("cls") val cls: String,
-        @SerialName("user") val user: Long = 0,
+        @SerialName("user") val user: Long = 0
     )
 
     fun encode(categories: List<Category>): String = json.encodeToString(
@@ -56,8 +48,8 @@ object CategoryCodec {
             version = CURRENT_VERSION,
             categories = CategoryOps.normalize(categories).map { c ->
                 CategoryDto(c.id, c.name, c.order, c.apps.map { AppKeyDto(it.packageName, it.className, it.userSerial) })
-            },
-        ),
+            }
+        )
     )
 
     /** Returns null if [text] is not a readable document (callers should then keep the data untouched). */
@@ -70,9 +62,9 @@ object CategoryCodec {
                     id = c.id,
                     name = c.name,
                     order = c.order,
-                    apps = c.apps.map { AppKey(it.pkg, it.cls, it.user) }.distinct(),
+                    apps = c.apps.map { AppKey(it.pkg, it.cls, it.user) }.distinct()
                 )
-            },
+            }
         )
     }.getOrNull()
 

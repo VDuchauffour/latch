@@ -31,19 +31,19 @@ object LatchType {
         fontSize = 40.sp,
         lineHeight = 46.sp,
         fontWeight = FontWeight.ExtraBold,
-        shadow = TextShadow,
+        shadow = TextShadow
     )
     val SectionHeader = TextStyle(
         color = LatchColors.Text,
         fontSize = 34.sp,
         fontWeight = FontWeight.ExtraBold,
-        shadow = TextShadow,
+        shadow = TextShadow
     )
     val TileLabel = TextStyle(
         color = LatchColors.Text,
         fontSize = 13.sp,
         lineHeight = 15.sp,
-        shadow = TextShadow,
+        shadow = TextShadow
     )
     val Hint = TextStyle(color = LatchColors.TextDim, fontSize = 15.sp, shadow = TextShadow)
 }
@@ -54,7 +54,7 @@ private val scheme = darkColorScheme(
     surface = Color(0xFF1E1E1E),
     onSurface = Color.White,
     surfaceContainer = Color(0xFF242424),
-    surfaceContainerHigh = Color(0xFF2A2A2A),
+    surfaceContainerHigh = Color(0xFF2A2A2A)
 )
 
 @Composable
