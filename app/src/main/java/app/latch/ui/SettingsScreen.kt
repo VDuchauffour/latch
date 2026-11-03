@@ -166,7 +166,7 @@ private fun Stepper(label: String, value: Int, range: IntRange, onChange: (Int) 
 private fun StepButton(symbol: String, enabled: Boolean, tag: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(32.dp)
             .alpha(if (enabled) 1f else 0.3f)
             .clip(CircleShape)
             .background(Color.White)
@@ -174,7 +174,7 @@ private fun StepButton(symbol: String, enabled: Boolean, tag: String, onClick: (
             .testTag(tag),
         contentAlignment = Alignment.Center
     ) {
-        Text(symbol, style = TextStyle(color = Color.Black, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold))
+        Text(symbol, style = TextStyle(color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold))
     }
 }
 
