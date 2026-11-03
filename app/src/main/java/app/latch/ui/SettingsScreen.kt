@@ -118,7 +118,7 @@ private fun SettingsSection(title: String, expanded: Boolean, onToggle: () -> Un
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
-                .padding(start = 32.dp, end = 24.dp, top = 8.dp, bottom = 8.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
                 .testTag("settingsSection:$title")
         )
         AnimatedVisibility(
