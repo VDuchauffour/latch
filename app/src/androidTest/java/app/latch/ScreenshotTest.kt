@@ -55,7 +55,7 @@ class ScreenshotTest {
         runBlocking {
             app.categories.update {
                 listOf(
-                    Category("productivity", "Productivity", 0, keys(GMAIL, CALENDAR, DRIVE, FILES, CLOCK, MAPS)),
+                    Category("productivity", "Productivity", 0, keys(GMAIL, CALENDAR, DRIVE, FILES, MAPS)),
                     Category("communication", "Communication", 1, keys(MESSAGES, PHONE, CONTACTS, CHROME)),
                     Category("media", "Media", 2, keys(PHOTOS, YOUTUBE, YT_MUSIC, CAMERA))
                 )
@@ -75,10 +75,10 @@ class ScreenshotTest {
     @Test fun captureAll() {
         shot("home")
 
-        drawer("Productivity")
-        drawer("Communication")
-        drawer("Media")
-        rule.onNodeWithTag("category:Media").performClick()
+        rule.onNodeWithTag("category:Productivity").performClick()
+        waitForTag("categoryApps:Productivity")
+        shot("drawer-productivity")
+        rule.onNodeWithTag("category:Productivity").performClick()
 
         rule.onNodeWithTag("searchIcon").performSemanticsAction(SemanticsActions.OnLongClick)
         waitForTag("quickMenu")
@@ -104,16 +104,9 @@ class ScreenshotTest {
         relaunch()
         // Set the query without focusing the field: the keyboard's suggestion strip can show the
         // (host-synced) clipboard, so keep it out of the shot.
-        scenario.onActivity { ViewModelProvider(it, LatchViewModel.Factory)[LatchViewModel::class.java].setQuery("c") }
+        scenario.onActivity { ViewModelProvider(it, LatchViewModel.Factory)[LatchViewModel::class.java].setQuery("me") }
         waitForTag("searchResults")
         shot("search")
-    }
-
-    /** Opens [name] (closing the previously open drawer) and captures it. */
-    private fun drawer(name: String) {
-        rule.onNodeWithTag("category:$name").performClick()
-        waitForTag("categoryApps:$name")
-        shot("drawer-${name.lowercase()}")
     }
 
     private fun hasTestTagPrefix(prefix: String) = SemanticsMatcher("testTag starts with $prefix") {
@@ -147,7 +140,6 @@ class ScreenshotTest {
         const val CALENDAR = "com.google.android.calendar"
         const val DRIVE = "com.google.android.apps.docs"
         const val FILES = "com.google.android.documentsui"
-        const val CLOCK = "com.google.android.deskclock"
         const val MAPS = "com.google.android.apps.maps"
         const val MESSAGES = "com.google.android.apps.messaging"
         const val PHONE = "com.google.android.dialer"
