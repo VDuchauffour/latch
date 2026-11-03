@@ -1,3 +1,8 @@
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+default_stages:
+  - pre-commit
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -50,12 +55,16 @@ repos:
       - id: just-lint
         name: Android Lint
         entry: just lint
+        stages:
+          - pre-push
         language: system
         files: ^(app/|gradle/|.*\.gradle\.kts$|gradle\.properties$)
         pass_filenames: false
       - id: just-test
         name: Unit tests
         entry: just test
+        stages:
+          - pre-push
         language: system
         files: ^(app/|gradle/|.*\.gradle\.kts$|gradle\.properties$)
         pass_filenames: false

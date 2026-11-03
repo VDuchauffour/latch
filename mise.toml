@@ -1,4 +1,5 @@
 [tools]
 android-sdk = "latest"
 java = "17"
+pre-commit = "latest"
 yq = "latest"

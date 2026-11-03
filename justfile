@@ -5,16 +5,22 @@ emulator := "mise x android-sdk -- emulator"
 default:
     @just --list
 
-# One-time setup: install tools, accept SDK licenses, and install all agent skills
+# One-time setup: install tools, accept SDK licenses, install all agent skills and git hooks
 setup:
     just _setup-tools
     just _setup-skills
+    just _setup-precommit
 
-# Install tools (JDK 17, Android SDK, yq) via mise and accept SDK licenses
+# Install tools (JDK 17, Android SDK, pre-commit, yq) via mise and accept SDK licenses
 [private]
 _setup-tools:
     mise install
     mise x android-sdk -- sdkmanager --licenses
+
+# Install git hooks (pre-commit and pre-push) via pre-commit
+[private]
+_setup-precommit:
+    mise x pre-commit -- pre-commit install
 
 # Install all Android agent skills into this project
 [private]
