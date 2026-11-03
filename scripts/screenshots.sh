@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Capture the README screenshots into assets/screenshots.
 # Usage: scripts/screenshots.sh [AVD]  (boots AVD, default "latch", if no device is connected)
+# Drawers use the Google apps of the emulator image, so use a Google APIs system image.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 avd="${1:-latch}"
@@ -11,10 +12,6 @@ if ! adb get-state >/dev/null 2>&1; then
 fi
 adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
 
-# Placeholder apps, only in the current user so they aren't duplicated in a work profile.
-./gradlew -p screenshots/fakeapps assembleDebug
-adb uninstall app.latch.fakeapps >/dev/null 2>&1 || true
-adb install --user current screenshots/fakeapps/build/outputs/apk/debug/LatchFakeApps-debug.apk
 ./gradlew installDebug installDebugAndroidTest
 
 # Clean status bar: fixed clock, full battery and wifi, no notifications.

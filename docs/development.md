@@ -50,7 +50,7 @@ Note: installing the test APK can reset the default home app; run `set-home-acti
 
 ## Screenshots
 
-`just screenshots` ([scripts/screenshots.sh](../scripts/screenshots.sh)) regenerates the README screenshots in [assets/screenshots](../assets/screenshots) on an emulator: it boots the AVD if no device is connected, installs the placeholder apps from [screenshots/fakeapps](../screenshots/fakeapps), cleans the status bar with demo mode, runs `ScreenshotTest` (which fills a Productivity and a Social drawer) and pulls the PNGs.
+`just screenshots` ([scripts/screenshots.sh](../scripts/screenshots.sh)) regenerates the README screenshots in [assets/screenshots](../assets/screenshots) on an emulator with a Google APIs system image: it boots the AVD if no device is connected, cleans the status bar with demo mode, runs `ScreenshotTest` (which fills Productivity, Communication and Media drawers with the image's Google apps) and pulls the PNGs.
 
 ## Layout
 
