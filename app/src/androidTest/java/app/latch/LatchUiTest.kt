@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.latch.data.TileBackground
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -123,6 +124,13 @@ class LatchUiTest {
         rule.onNodeWithTag("settingsSection:Appearance").performClick()
         rule.onNodeWithText("Apps per drawer").assertIsDisplayed()
         rule.onNodeWithText("Gray icons").assertIsDisplayed()
+        val shade = rule.onNodeWithTag("tileBackground:value").fetchSemanticsNode()
+            .config[SemanticsProperties.Text].first().text
+        rule.onNodeWithTag("tileBackground").performClick()
+        rule.onNodeWithTag("tileBackgroundDialog").assertIsDisplayed()
+        rule.onNodeWithText(shade, useUnmergedTree = true).assertExists()
+        rule.onNodeWithTag("tileBackground:${TileBackground.entries.first { it.label == shade }.name}").performClick()
+        rule.waitUntil(3_000) { rule.onAllNodesWithTag("tileBackgroundDialog").fetchSemanticsNodes().isEmpty() }
         val before = rule.onNodeWithTag("appsPerDrawer:value").fetchSemanticsNode()
             .config[SemanticsProperties.Text].first().text.toInt()
         val button = if (before < 7) "appsPerDrawer:plus" else "appsPerDrawer:minus"

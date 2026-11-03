@@ -14,8 +14,6 @@ import androidx.compose.ui.unit.sp
 object LatchColors {
     val Text = Color.White
     val TextDim = Color.White.copy(alpha = 0.6f)
-    val Tile = Color.White.copy(alpha = 0.08f)
-    val TileHover = Color.White.copy(alpha = 0.18f)
 
     /** Light dimming behind full-screen overlays (all apps, Latch settings); the wallpaper stays visible. */
     val OverlayScrim = Color(0xFF0B0B0B).copy(alpha = 0.30f)

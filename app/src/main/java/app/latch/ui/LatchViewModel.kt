@@ -16,6 +16,7 @@ import app.latch.data.CategoryStore
 import app.latch.data.CategoryStore.Companion.newId
 import app.latch.data.LatchSettings
 import app.latch.data.SettingsStore
+import app.latch.data.TileBackground
 import app.latch.domain.AlphaSections
 import app.latch.domain.AppEntry
 import app.latch.domain.AppKey
@@ -174,6 +175,10 @@ class LatchViewModel(
 
     fun setGrayIcons(enabled: Boolean) {
         viewModelScope.launch { settingsStore.setGrayIcons(enabled) }
+    }
+
+    fun setTileBackground(background: TileBackground) {
+        viewModelScope.launch { settingsStore.setTileBackground(background) }
     }
 
     // --- Apps ---

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.latch.data.IconLoader
+import app.latch.data.TileBackground
 import app.latch.domain.AppEntry
 import app.latch.domain.AppKey
 import app.latch.ui.theme.LatchColors
@@ -60,6 +62,8 @@ val LocalIconLoader = staticCompositionLocalOf<IconLoader> { error("No IconLoade
 
 /** Whether app icons render in grayscale (Latch settings → Appearance). */
 val LocalGrayIcons = compositionLocalOf { false }
+
+val LocalTileBackground = compositionLocalOf { TileBackground.DEFAULT }
 
 private val GrayscaleFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
@@ -138,10 +142,9 @@ fun AppTile(
     Box(modifier) {
         Column(
             modifier = Modifier
-                // Fill the tile's width so every tile's background is the same size, whatever the label.
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(if (highlighted) LatchColors.TileHover else LatchColors.Tile)
+                .background(tileBackgroundColor(LocalTileBackground.current, highlighted))
                 .onGloballyPositioned { coords = it }
                 .tapLongPressDrag(entry.key, handler)
                 .alpha(if (dimmed) 0.35f else 1f)
@@ -179,6 +182,11 @@ fun AppTile(
         )
     }
 }
+
+private fun tileBackgroundColor(background: TileBackground, highlighted: Boolean): Color =
+    Color.White.copy(alpha = background.alpha + if (highlighted) TILE_HIGHLIGHT_ALPHA else 0f)
+
+private const val TILE_HIGHLIGHT_ALPHA = 0.10f
 
 @Composable
 fun AppIcon(key: AppKey, modifier: Modifier = Modifier) {

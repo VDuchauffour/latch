@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.latch.data.TileBackground
 import app.latch.domain.AppEntry
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
@@ -204,6 +205,7 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         object : SettingsActions {
             override fun setAppsPerDrawer(count: Int) = vm.setAppsPerDrawer(count)
             override fun setGrayIcons(enabled: Boolean) = vm.setGrayIcons(enabled)
+            override fun setTileBackground(background: TileBackground) = vm.setTileBackground(background)
             override fun close() = vm.setSettingsOpen(false)
         }
     }
@@ -227,7 +229,10 @@ internal fun StatelessLatchScreen(state: UiState, vm: LatchViewModel) {
         }
     }
 
-    CompositionLocalProvider(LocalGrayIcons provides state.settings.grayIcons) {
+    CompositionLocalProvider(
+        LocalGrayIcons provides state.settings.grayIcons,
+        LocalTileBackground provides state.settings.tileBackground
+    ) {
         BoxWithConstraints(Modifier.fillMaxSize().testTag("root")) {
             val heightPx = constraints.maxHeight.toFloat()
             LaunchedEffect(heightPx) {

@@ -22,13 +22,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.latch.R
 import app.latch.data.LatchSettings
+import app.latch.data.TileBackground
 import app.latch.ui.theme.LatchColors
 import app.latch.ui.theme.LatchType
 import app.latch.ui.theme.TextShadow
@@ -61,6 +68,7 @@ import app.latch.ui.theme.TextShadow
 interface SettingsActions {
     fun setAppsPerDrawer(count: Int)
     fun setGrayIcons(enabled: Boolean)
+    fun setTileBackground(background: TileBackground)
 
     /** Close the settings screen, e.g. after a tap on empty space. */
     fun close()
@@ -73,6 +81,7 @@ interface SettingsActions {
 @Composable
 fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: Modifier = Modifier) {
     var openSection by rememberSaveable { mutableStateOf<String?>(null) }
+    var tileBackgroundPicker by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -112,7 +121,24 @@ fun SettingsScreen(settings: LatchSettings, actions: SettingsActions, modifier: 
                 onChange = actions::setGrayIcons,
                 tag = "grayIcons"
             )
+            Choice(
+                label = "App background",
+                icon = R.drawable.ic_setting_tile_background,
+                value = settings.tileBackground.label,
+                onClick = { tileBackgroundPicker = true },
+                tag = "tileBackground"
+            )
         }
+    }
+    if (tileBackgroundPicker) {
+        TileBackgroundDialog(
+            selected = settings.tileBackground,
+            onSelect = {
+                actions.setTileBackground(it)
+                tileBackgroundPicker = false
+            },
+            onDismiss = { tileBackgroundPicker = false }
+        )
     }
 }
 
@@ -245,4 +271,54 @@ private fun Toggle(label: String, @DrawableRes icon: Int, checked: Boolean, onCh
             )
         )
     }
+}
+
+@Composable
+private fun Choice(label: String, @DrawableRes icon: Int, value: String, onClick: () -> Unit, tag: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 4.dp)
+            .testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconLabel(label, icon, iconSize = 20.dp, style = SettingLabel)
+        Text(value, style = SettingLabel.copy(color = LatchColors.TextDim), modifier = Modifier.testTag("$tag:value"))
+    }
+}
+
+@Composable
+private fun TileBackgroundDialog(selected: TileBackground, onSelect: (TileBackground) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("App background") },
+        text = {
+            Column(Modifier.selectableGroup().testTag("tileBackgroundDialog")) {
+                TileBackground.entries.forEach { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = option == selected, role = Role.RadioButton, onClick = { onSelect(option) })
+                            .padding(vertical = 8.dp)
+                            .testTag("tileBackground:${option.name}"),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = option == selected, onClick = null)
+                        Text(option.label, modifier = Modifier.weight(1f).padding(start = 12.dp))
+                        Box(
+                            Modifier
+                                .size(width = 40.dp, height = 28.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.Black.copy(alpha = 0.6f))
+                                .background(Color.White.copy(alpha = option.alpha))
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
 }
